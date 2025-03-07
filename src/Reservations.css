@@ -1,0 +1,387 @@
+.reservations-container {
+  width: 100%;
+  animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #222;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.page-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, #b39149, #dcc286);
+  border-radius: 3px;
+}
+
+.reservations-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  background-color: white;
+  padding: 1.2rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.search-container {
+  position: relative;
+  width: 300px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 2.5rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #b39149;
+  box-shadow: 0 0 0 3px rgba(179, 145, 73, 0.1);
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+.filter-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.filter-select {
+  padding: 0.8rem 2.5rem 0.8rem 1rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23b39149' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 0.8rem) center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 140px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #b39149;
+  box-shadow: 0 0 0 3px rgba(179, 145, 73, 0.1);
+}
+
+.export-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.2rem;
+  background-color: #f8f8f8;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  color: #555;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.export-button:hover {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.table-container {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  margin-bottom: 1.5rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.data-table th {
+  padding: 1.2rem 1.5rem;
+  text-align: left;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+
+.data-table th:first-child {
+  padding-left: 1.8rem;
+}
+
+.data-table td {
+  padding: 1.2rem 1.5rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #eee;
+  color: #333;
+  transition: background-color 0.2s ease;
+}
+
+.data-table td:first-child {
+  padding-left: 1.8rem;
+}
+
+.table-actions {
+  width: 60px;
+  text-align: center;
+}
+
+.guest-cell, .property-cell, .price-cell, .fees-cell, .payout-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.guest-name, .property-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 0.4rem;
+}
+
+.booking-source, .dates, .nights {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.price-detail, .fee-detail, .payout-detail {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.price-label, .fee-label, .payout-label {
+  color: #777;
+  margin-right: 0.8rem;
+  min-width: 75px;
+}
+
+.price-value, .fee-value, .payout-value {
+  color: #333;
+  font-weight: 500;
+}
+
+.owner-payout {
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed #eee;
+}
+
+.owner-payout .payout-label {
+  font-weight: 600;
+}
+
+.owner-payout .payout-value {
+  color: #b39149;
+  font-weight: 600;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 50px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status-badge.confirmed {
+  background-color: rgba(79, 89, 209, 0.1);
+  color: #4f59d1;
+}
+
+.status-badge.completed {
+  background-color: rgba(40, 167, 120, 0.1);
+  color: #28a778;
+}
+
+.status-badge.cancelled {
+  background-color: rgba(228, 64, 64, 0.1);
+  color: #e44040;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: transparent;
+  color: #777;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-button:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.data-table tr:hover td {
+  background-color: #fdfaf2;
+}
+
+.no-results {
+  background-color: white;
+  border-radius: 12px;
+  padding: 4rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.no-results svg {
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.no-results p {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  color: #777;
+  margin-bottom: 1.5rem;
+}
+
+.reset-filters-button {
+  padding: 0.7rem 1.2rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background-color: #f5f5f5;
+  color: #555;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reset-filters-button:hover {
+  background-color: #eee;
+  color: #333;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 1.5rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.pagination-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.2rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background-color: white;
+  color: #555;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:not(:disabled):hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  color: #777;
+}
+
+@media (max-width: 1280px) {
+  .reservations-filters {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .search-container {
+    width: 100%;
+  }
+  
+  .filter-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .export-button {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .data-table {
+    min-width: 1200px;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+}
