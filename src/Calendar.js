@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { CalendarPopup } from './CalendarPopup';
 import api from './api/api';
 import './Calendar.css';
 
@@ -7,12 +6,12 @@ export const Calendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedView, setSelectedView] = useState('month');
   const [showPrices, setShowPrices] = useState(true);
-  const [selectedBooking, setSelectedBooking] = useState(null);
   const [properties, setProperties] = useState([]);
-  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [selectedProperty, setSelectedProperty] = useState('');
   const [calendarData, setCalendarData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hoverReservation, setHoverReservation] = useState(null);
   
   // Fetch properties on component mount
   useEffect(() => {
@@ -33,16 +32,21 @@ export const Calendar = () => {
     
     try {
       const data = await api.getListings();
-      setProperties(data);
+      console.log("Properties loaded:", data);
       
-      // Set first property as selected by default
-      if (data.length > 0 && !selectedProperty) {
-        setSelectedProperty(data[0].id);
+      // Make sure we have valid properties array
+      const propertiesList = Array.isArray(data) ? data : [];
+      setProperties(propertiesList);
+      
+      // Set first property as selected by default if available
+      if (propertiesList.length > 0 && !selectedProperty) {
+        setSelectedProperty(propertiesList[0].id);
       }
       
-      setLoading(false);
     } catch (err) {
+      console.error("Error fetching properties:", err);
       setError(err);
+    } finally {
       setLoading(false);
     }
   };
@@ -65,7 +69,7 @@ export const Calendar = () => {
       // Get last day of month
       const lastDayOfMonth = new Date(year, month + 1, 0);
       
-      // Extend dates to include days from previous/next month
+      // Extend dates to include days from previous/next month to fill calendar grid
       const startDate = new Date(firstDayOfMonth);
       startDate.setDate(startDate.getDate() - firstDayOfMonth.getDay());
       
@@ -77,22 +81,28 @@ export const Calendar = () => {
       const formattedStartDate = startDate.toISOString().split('T')[0];
       const formattedEndDate = endDate.toISOString().split('T')[0];
       
-      // In a real app, we'd fetch this data from the API
-      // const data = await api.getCalendar(selectedProperty, formattedStartDate, formattedEndDate);
+      // Fetch reservations for this date range
+      const { reservations } = await api.getReservations({
+        listingId: selectedProperty,
+        checkInDateFrom: formattedStartDate,
+        checkOutDateTo: formattedEndDate,
+        limit: 100
+      });
       
-      // For now, we'll use the sample data function
-      const days = generateCalendarDays();
+      // Generate calendar days with reservations
+      const days = generateCalendarDays(reservations || []);
       setCalendarData(days);
       
-      setLoading(false);
     } catch (err) {
+      console.error("Error fetching calendar data:", err);
       setError(err);
+    } finally {
       setLoading(false);
     }
   };
-  
+
   // Generate days for the calendar
-  const generateCalendarDays = () => {
+  const generateCalendarDays = (reservations = []) => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
     
@@ -122,112 +132,118 @@ export const Calendar = () => {
     const previousMonthLastDay = previousMonth.getDate();
     
     for (let i = 0; i < daysFromPreviousMonth; i++) {
+      const currentDate = new Date(year, month - 1, previousMonthLastDay - daysFromPreviousMonth + i + 1);
+      const dayReservations = getReservationsForDate(currentDate, reservations);
       days.push({
-        date: new Date(year, month - 1, previousMonthLastDay - daysFromPreviousMonth + i + 1),
+        date: currentDate,
         isCurrentMonth: false,
-        bookings: []
+        reservations: dayReservations,
+        dayPrice: 700 // Default price
       });
     }
     
     // Add days from current month
     for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
+      const currentDate = new Date(year, month, i);
+      const dayReservations = getReservationsForDate(currentDate, reservations);
       days.push({
-        date: new Date(year, month, i),
+        date: currentDate,
         isCurrentMonth: true,
-        bookings: getSampleBookings(year, month, i)
+        reservations: dayReservations,
+        dayPrice: 700 // Default price
       });
     }
     
     // Add days from next month
     const remainingCells = totalCells - days.length;
     for (let i = 1; i <= remainingCells; i++) {
+      const currentDate = new Date(year, month + 1, i);
+      const dayReservations = getReservationsForDate(currentDate, reservations);
       days.push({
-        date: new Date(year, month + 1, i),
+        date: currentDate,
         isCurrentMonth: false,
-        bookings: []
+        reservations: dayReservations,
+        dayPrice: 700 // Default price
       });
     }
     
     return days;
   };
+
+  // Get reservations for a specific date
+  const getReservationsForDate = (date, reservations) => {
+    // Format the current date to midnight for comparison
+    const currentDate = new Date(date);
+    currentDate.setHours(0, 0, 0, 0);
+    
+    // Check if the date is in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const isPast = currentDate < today;
+    
+    // Find all reservations that include this date
+    return reservations.filter(reservation => {
+      // Get the check-in and check-out dates
+      const checkIn = new Date(reservation.arrivalDate || reservation.checkInDate);
+      const checkOut = new Date(reservation.departureDate || reservation.checkOutDate);
+      
+      // Reset hours to compare dates properly
+      checkIn.setHours(0, 0, 0, 0);
+      checkOut.setHours(0, 0, 0, 0);
+      
+      // Check if the current date falls within the reservation period
+      return currentDate >= checkIn && currentDate <= checkOut;
+    }).map(reservation => {
+      // Get the check-in and check-out dates
+      const checkIn = new Date(reservation.arrivalDate || reservation.checkInDate);
+      const checkOut = new Date(reservation.departureDate || reservation.checkOutDate);
+      
+      // Reset hours to compare dates properly
+      checkIn.setHours(0, 0, 0, 0);
+      checkOut.setHours(0, 0, 0, 0);
+      
+      // Calculate reservation position
+      let position = 'middle';
+      if (currentDate.getTime() === checkIn.getTime()) {
+        position = 'start';
+      }
+      if (currentDate.getTime() === checkOut.getTime()) {
+        position = 'end';
+      }
+      if (checkIn.getTime() === checkOut.getTime()) {
+        position = 'single';
+      }
+      
+      // Get initial from guest name
+      const guestName = reservation.guestName || 'Guest';
+      const initial = guestName.charAt(0).toUpperCase();
+      
+      return {
+        ...reservation,
+        position,
+        isPast,
+        initial,
+        // Ensure these properties exist
+        guestCount: reservation.guestsCount || reservation.guests || 1,
+        amount: parseFloat(reservation.totalPrice) || 0,
+        color: isPast ? '#767676' : '#5E9E9F'
+      };
+    });
+  };
   
-  // Sample data for bookings
-  const getSampleBookings = (year, month, day) => {
-    // Add some bookings for demonstration
-    const bookings = [];
+  // Calculate nights between two dates
+  const calculateNights = (checkIn, checkOut) => {
+    if (!checkIn || !checkOut) return 0;
     
-    // Specific sample bookings for April 2025
-    if (year === 2025 && month === 3) { // April is month 3 (0-indexed)
-      if (day === 8) {
-        bookings.push({
-          id: 'booking-1',
-          guestName: 'Jean Marie C.',
-          amount: 2160.01,
-          checkIn: new Date(2025, 3, 7),
-          checkOut: new Date(2025, 3, 10),
-          nights: 3,
-          guests: 10,
-          type: 'booking'
-        });
-      }
-      
-      if (day === 11) {
-        bookings.push({
-          id: 'booking-2',
-          guestName: 'Dan S.',
-          amount: 2332.06,
-          type: 'booking'
-        });
-      }
-      
-      if (day === 3) {
-        bookings.push({
-          id: 'booking-3',
-          guestName: 'Brad H.',
-          amount: 2791.98,
-          type: 'booking'
-        });
-      }
-      
-      if (day === 25) {
-        bookings.push({
-          id: 'booking-4',
-          guestName: 'Kevin H.',
-          amount: 2161.56,
-          type: 'booking'
-        });
-      }
-      
-      // Owner blocks
-      if (day === 9) {
-        bookings.push({
-          id: 'block-1',
-          type: 'ownerBlock',
-          blockId: 9071,
-          startDate: new Date(2025, 2, 2), // Mar 2, 2025
-          endDate: new Date(2050, 0, 1), // Jan 1, 2050
-          notes: 'Owner Block'
-        });
-      }
-      
-      if (day === 15) {
-        bookings.push({
-          id: 'block-2',
-          type: 'ownerBlock',
-          blockId: 9433,
-          startDate: new Date(2025, 3, 4), // Apr 4, 2025
-          endDate: new Date(2050, 11, 31), // Dec 31, 2050
-          notes: 'Owner Block'
-        });
-      }
-    }
-    
-    return bookings;
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    const diffTime = Math.abs(end - start);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
   // Format month and year
   const formatMonthYear = (date) => {
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
   
   // Navigate to previous month
@@ -245,23 +261,67 @@ export const Calendar = () => {
     setCurrentMonth(new Date());
   };
   
-  // Handle booking click
-  const handleBookingClick = (booking) => {
-    setSelectedBooking(booking);
+  // Handle property change
+  const handlePropertyChange = (e) => {
+    setSelectedProperty(e.target.value);
   };
-  
-  // Close booking popup
-  const closeBookingPopup = () => {
-    setSelectedBooking(null);
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
   };
-  
+
+  // Handle reservation hover
+  const handleReservationHover = (reservation, event) => {
+    if (reservation) {
+      // Calculate position for hover card
+      const rect = event.currentTarget.getBoundingClientRect();
+      const hoverData = {
+        ...reservation,
+        position: {
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width
+        }
+      };
+      setHoverReservation(hoverData);
+    } else {
+      setHoverReservation(null);
+    }
+  };
+
   return (
     <div className="calendar-container">
       <div className="page-header">
         <h1 className="page-title">Calendar</h1>
-        <div className="calendar-tabs">
-          <button className="calendar-tab active">Calendar</button>
-          <button className="calendar-tab">Booking Report</button>
+        
+        <div className="view-tabs">
+          <button className="view-tab active">Calendar</button>
+          <button className="view-tab">Booking Report</button>
+        </div>
+      </div>
+
+      {/* Property selector */}
+      <div className="property-selector">
+        <div className="property-select-wrapper">
+          <select
+            value={selectedProperty}
+            onChange={handlePropertyChange}
+            className="property-select"
+          >
+            <option value="" disabled>Select a property</option>
+            {properties.map(property => (
+              <option key={property.id} value={property.id}>
+                {property.name || `Property #${property.id}`}
+              </option>
+            ))}
+          </select>
+          <span className="select-arrow">▼</span>
         </div>
       </div>
 
@@ -279,138 +339,187 @@ export const Calendar = () => {
         </div>
       )}
 
-      {!loading && !error && (
-        <>
-          <div className="calendar-controls">
-            <div className="calendar-navigation">
-              <button className="nav-button" onClick={goToPreviousMonth}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6"></polyline>
+      {!loading && !error && selectedProperty && (
+        <div className="calendar-view">
+          <div className="calendar-header-bar">
+            <div className="month-nav">
+              <button className="month-nav-button" onClick={goToPreviousMonth}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 19L8 12L15 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
-              <span className="current-month">{formatMonthYear(currentMonth)}</span>
-              <button className="nav-button" onClick={goToNextMonth}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6"></polyline>
+              <h2 className="month-display">{formatMonthYear(currentMonth)}</h2>
+              <button className="month-nav-button" onClick={goToNextMonth}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 5L16 12L9 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
             </div>
             
-            <div className="view-controls">
-              <button 
-                className="view-control-button" 
-                onClick={goToToday}
-              >
-                Today
-              </button>
-              <div className="view-toggle">
+            <div className="calendar-actions">
+              <button className="today-btn" onClick={goToToday}>Today</button>
+              
+              <div className="view-selector">
                 <button 
-                  className={`view-toggle-button ${selectedView === 'month' ? 'active' : ''}`}
+                  className={`view-btn ${selectedView === 'month' ? 'active' : ''}`}
                   onClick={() => setSelectedView('month')}
                 >
                   Month
                 </button>
                 <button 
-                  className={`view-toggle-button ${selectedView === 'week' ? 'active' : ''}`}
+                  className={`view-btn ${selectedView === 'week' ? 'active' : ''}`}
                   onClick={() => setSelectedView('week')}
                 >
                   Week
                 </button>
               </div>
-            </div>
-            
-            <div className="price-toggle">
-              <label className="toggle-label">
-                Prices
-                <div className="toggle-switch">
+              
+              <div className="price-toggle">
+                <span>Prices</span>
+                <label className="toggle">
                   <input 
                     type="checkbox" 
                     checked={showPrices} 
                     onChange={() => setShowPrices(!showPrices)}
                   />
                   <span className="toggle-slider"></span>
-                </div>
-              </label>
-              <button className="calendar-add-button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </button>
+                </label>
+                <button className="add-btn">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
           
-          <div className="calendar-grid">
-            <div className="calendar-header">
-              <div className="calendar-day-header">Sun</div>
-              <div className="calendar-day-header">Mon</div>
-              <div className="calendar-day-header">Tue</div>
-              <div className="calendar-day-header">Wed</div>
-              <div className="calendar-day-header">Thu</div>
-              <div className="calendar-day-header">Fri</div>
-              <div className="calendar-day-header">Sat</div>
+          <div className="airbnb-calendar">
+            <div className="weekday-header">
+              <div className="weekday">Su</div>
+              <div className="weekday">Mo</div>
+              <div className="weekday">Tu</div>
+              <div className="weekday">We</div>
+              <div className="weekday">Th</div>
+              <div className="weekday">Fr</div>
+              <div className="weekday">Sa</div>
             </div>
             
-            <div className="calendar-body">
+            <div className="calendar-grid">
               {calendarData.map((day, index) => (
                 <div 
                   key={index} 
                   className={`calendar-cell ${!day.isCurrentMonth ? 'outside-month' : ''}`}
                 >
-                  <div className="calendar-date">{day.date.getDate()}</div>
+                  <div className="date-number">{day.date.getDate()}</div>
                   
-                  {day.bookings.length > 0 && (
-                    <div className="calendar-events">
-                      {day.bookings.map((booking) => (
+                  {day.reservations.length > 0 && day.reservations.map((reservation, resIndex) => {
+                    // Only render if this reservation has guest details
+                    if (reservation.guestName) {
+                      return (
                         <div 
-                          key={booking.id}
-                          onClick={() => handleBookingClick(booking)}
-                          className={`calendar-event ${booking.type === 'ownerBlock' ? 'owner-block' : 'booking'}`}
+                          key={`${reservation.id}-${resIndex}`}
+                          className="reservation-bar"
+                          style={{backgroundColor: reservation.color}}
+                          onMouseEnter={(e) => handleReservationHover(reservation, e)}
+                          onMouseLeave={() => handleReservationHover(null)}
                         >
-                          {booking.type === 'booking' && (
-                            <div className="booking-info">
-                              <div className="guest-name">{booking.guestName}</div>
-                              <div className="booking-amount">${booking.amount.toFixed(2)}</div>
+                          <div className="guest-info">
+                            <div className="initial-circle">
+                              {reservation.initial}
                             </div>
-                          )}
-                          
-                          {booking.type === 'ownerBlock' && (
-                            <div className="owner-block-info">
-                              <div className="block-title">Owner Block</div>
-                              <div className="block-id">#{booking.blockId}</div>
+                            <div className="reservation-info">
+                              <div className="guest-name">{reservation.guestName}</div>
+                              <div className="guest-count">{reservation.guestCount} guest{reservation.guestCount !== 1 ? 's' : ''}</div>
+                              <div className="reservation-amount">{formatCurrency(reservation.amount)}</div>
                             </div>
-                          )}
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      );
+                    }
+                    
+                    // If not a guest info cell but part of a reservation, render a bar
+                    return (
+                      <div 
+                        key={`${reservation.id}-${resIndex}`}
+                        className="reservation-bar"
+                        style={{backgroundColor: reservation.color}}
+                        onMouseEnter={(e) => handleReservationHover(reservation, e)}
+                        onMouseLeave={() => handleReservationHover(null)}
+                      />
+                    );
+                  })}
                   
-                  {showPrices && day.isCurrentMonth && (
-                    <div className="calendar-price">$700</div>
+                  {showPrices && day.isCurrentMonth && day.reservations.length === 0 && (
+                    <div className="day-price">{formatCurrency(day.dayPrice)}</div>
                   )}
                 </div>
               ))}
             </div>
           </div>
-          
-          <div className="calendar-legend">
-            <div className="legend-item">
-              <div className="legend-color blocked"></div>
-              <div className="legend-label">Blocked</div>
-            </div>
-            <div className="legend-item">
-              <div className="legend-color booked"></div>
-              <div className="legend-label">Booked</div>
-            </div>
-          </div>
-        </>
+        </div>
+      )}
+
+      {!selectedProperty && !loading && (
+        <div className="empty-state">
+          <h3>Please select a property</h3>
+          <p>Select a property from the dropdown to view its calendar.</p>
+        </div>
       )}
       
-      {selectedBooking && (
-        <CalendarPopup 
-          booking={selectedBooking} 
-          onClose={closeBookingPopup} 
-        />
+      {/* Reservation hover card */}
+      {hoverReservation && (
+        <div 
+          className="reservation-details-card"
+          style={{
+            top: `${hoverReservation.position.top + 40}px`,
+            left: `${hoverReservation.position.left}px`
+          }}
+        >
+          <div className="card-header">
+            <div className="guest-profile">
+              <div className="initial-circle" style={{ backgroundColor: hoverReservation.color }}>
+                {hoverReservation.initial}
+              </div>
+              <div className="guest-name-container">
+                <h4>{hoverReservation.guestName}</h4>
+                <span className="booking-source">{hoverReservation.bookingSource || 'Direct Booking'}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="card-body">
+            <div className="reservation-details">
+              <div className="detail-row">
+                <div className="detail-item">
+                  <span className="detail-label">Check-in</span>
+                  <span className="detail-value">
+                    {new Date(hoverReservation.checkInDate || hoverReservation.arrivalDate).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Check-out</span>
+                  <span className="detail-value">
+                    {new Date(hoverReservation.checkOutDate || hoverReservation.departureDate).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Nights</span>
+                  <span className="detail-value">
+                    {calculateNights(
+                      hoverReservation.checkInDate || hoverReservation.arrivalDate,
+                      hoverReservation.checkOutDate || hoverReservation.departureDate
+                    )}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="price-row">
+                <span className="detail-label">Total</span>
+                <span className="total-price">{formatCurrency(hoverReservation.amount)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
