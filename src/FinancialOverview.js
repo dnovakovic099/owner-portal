@@ -1,16 +1,83 @@
 import React, { useState, useEffect } from 'react';
-import { useListings, useReservations } from './api/hostawayHooks';
+import api from './api/api';
 import './FinancialOverview.css';
 
 export const FinancialOverview = () => {
-  // Period selection
+  // State management
   const [selectedPeriod, setSelectedPeriod] = useState('lastMonth');
+  const [properties, setProperties] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const [stats, setStats] = useState([]);
+  const [totalStats, setTotalStats] = useState({
+    totalRevenue: 0,
+    totalBookings: 0,
+    totalNights: 0,
+    totalPayout: 0,
+    occupancyRate: 0,
+    avgNightlyRate: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Get all properties
-  const { 
-    data: properties, 
-    loading: propertiesLoading 
-  } = useListings();
+  // Fetch properties on component mount
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+  
+  // Fetch reservations when period changes
+  useEffect(() => {
+    if (properties.length > 0) {
+      fetchReservations();
+    }
+  }, [selectedPeriod, properties]);
+  
+  // Calculate stats when properties or reservations change
+  useEffect(() => {
+    if (properties.length > 0 && reservations.length > 0) {
+      calculateStats();
+    }
+  }, [properties, reservations]);
+  
+  // Function to fetch all properties
+  const fetchProperties = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const data = await api.getListings();
+      console.log("Properties loaded:", data);
+      setProperties(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error fetching properties:", err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Function to fetch reservations based on selected period
+  const fetchReservations = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const dateParams = getDateParams();
+      console.log("Fetching reservations with date params:", dateParams);
+      
+      const { reservations: data } = await api.getReservations({
+        ...dateParams,
+        limit: 100 // Get more reservations for accurate stats
+      });
+      
+      console.log("Reservations loaded:", data);
+      setReservations(data || []);
+    } catch (err) {
+      console.error("Error fetching reservations:", err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Setup date params based on period
   const getDateParams = () => {
@@ -43,56 +110,42 @@ export const FinancialOverview = () => {
     };
   };
   
-  // Get confirmed reservations with date filtering
-  const { 
-    data: reservations, 
-    loading: reservationsLoading,
-    updateParams
-  } = useReservations(true, { 
-    ...getDateParams(),
-    limit: 100 // Get more reservations for accurate stats
-  });
-  
-  // Update date filters when period changes
-  useEffect(() => {
-    updateParams(getDateParams());
-  }, [selectedPeriod, updateParams]);
-  
-  // Stats for all properties and individual properties
-  const [stats, setStats] = useState([]);
-  const [totalStats, setTotalStats] = useState({
-    totalRevenue: 0,
-    totalBookings: 0,
-    totalNights: 0,
-    totalPayout: 0,
-    occupancyRate: 0,
-    avgNightlyRate: 0
-  });
-  
-  // Calculate stats when properties or reservations change
-  useEffect(() => {
-    if (propertiesLoading || reservationsLoading) return;
+  // Calculate stats for properties
+  const calculateStats = () => {
+    console.log("Calculating stats with:", {
+      propertiesCount: properties.length,
+      reservationsCount: reservations.length
+    });
     
     // Calculate stats for each property
     const propertyStats = properties.map(property => {
-      // Filter reservations for this property
+      // Match property with reservations 
+      // Look for listingId, listingMapId, or other identifying fields
+      const propertyId = property.id;
+      
+      // Filter reservations for this property - using multiple ID fields for matching
       const propertyReservations = reservations.filter(r => 
-        r.listingId === property.id
+        r.listingId === propertyId || 
+        r.listingMapId === propertyId ||
+        (property.externalId && r.externalPropertyId === property.externalId)
       );
+      
+      console.log(`Found ${propertyReservations.length} reservations for property ${property.name || property.id}`);
       
       // Calculate total revenue
       let totalRevenue = 0;
       let totalNights = 0;
       
       propertyReservations.forEach(reservation => {
-        // Calculate nights
-        const checkIn = new Date(reservation.checkInDate);
-        const checkOut = new Date(reservation.checkOutDate);
-        const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+        // Calculate nights - use nights field if available, otherwise calculate
+        const nights = reservation.nights || calculateNights(
+          reservation.arrivalDate || reservation.checkInDate,
+          reservation.departureDate || reservation.checkOutDate
+        );
         
         totalNights += nights;
         
-        // Add to total revenue
+        // Add to total revenue - use totalPrice directly
         totalRevenue += parseFloat(reservation.totalPrice) || 0;
       });
       
@@ -105,7 +158,18 @@ export const FinancialOverview = () => {
       
       // Calculate average nightly rate
       const avgNightlyRate = propertyReservations.length > 0 
-        ? propertyReservations.reduce((sum, r) => sum + (parseFloat(r.basePrice) || 0), 0) / propertyReservations.length
+        ? propertyReservations.reduce((sum, r) => {
+            // Calculate base price from total and nights
+            const nights = r.nights || calculateNights(
+              r.arrivalDate || r.checkInDate,
+              r.departureDate || r.checkOutDate
+            );
+            const cleaningFee = parseFloat(r.cleaningFee) || 0;
+            const basePrice = nights > 0 ? 
+              ((parseFloat(r.totalPrice) || 0) - cleaningFee) / nights : 0;
+            
+            return sum + basePrice;
+          }, 0) / propertyReservations.length
         : 0;
       
       // Calculate occupancy rate
@@ -114,8 +178,12 @@ export const FinancialOverview = () => {
       
       return {
         id: property.id,
-        name: property.name,
-        address: property.address?.full || `${property.address?.city || ''}, ${property.address?.country || ''}`,
+        name: property.name || `Property #${property.id}`,
+        // Get address from nested address object if available
+        address: property.address?.full || 
+                (property.address ? 
+                  `${property.address.city || ''}, ${property.address.country || ''}` : 
+                  'Address not available'),
         totalRevenue,
         ownerPayout,
         bookings: propertyReservations.length,
@@ -125,6 +193,7 @@ export const FinancialOverview = () => {
       };
     });
     
+    console.log("Calculated property stats:", propertyStats);
     setStats(propertyStats);
     
     // Calculate totals for all properties
@@ -148,12 +217,15 @@ export const FinancialOverview = () => {
       });
       
       // Calculate averages for rate fields
-      totals.occupancyRate = totals.occupancyRate / propertyStats.length;
-      totals.avgNightlyRate = totals.avgNightlyRate / propertyStats.length;
+      if (propertyStats.length > 0) {
+        totals.occupancyRate = totals.occupancyRate / propertyStats.length;
+        totals.avgNightlyRate = totals.avgNightlyRate / propertyStats.length;
+      }
       
+      console.log("Calculated total stats:", totals);
       setTotalStats(totals);
     }
-  }, [properties, reservations, selectedPeriod, propertiesLoading, reservationsLoading]);
+  };
   
   // Helper to calculate total days in the selected period
   const calculateTotalDaysInPeriod = (period) => {
@@ -176,6 +248,21 @@ export const FinancialOverview = () => {
     return days;
   };
   
+  // Calculate nights between dates
+  const calculateNights = (checkIn, checkOut) => {
+    if (!checkIn || !checkOut) return 0;
+    
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    const diffTime = Math.abs(end - start);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 0;
+  };
+  
+  // Handle period change
+  const handlePeriodChange = (event) => {
+    setSelectedPeriod(event.target.value);
+  };
+  
   // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -192,7 +279,7 @@ export const FinancialOverview = () => {
         <div className="period-selector">
           <select
             value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
+            onChange={handlePeriodChange}
             className="period-select"
           >
             <option value="lastMonth">Last Month</option>
@@ -204,15 +291,23 @@ export const FinancialOverview = () => {
       </div>
 
       {/* Loading state */}
-      {(propertiesLoading || reservationsLoading) && (
+      {loading && (
         <div className="loading-container">
           <div className="spinner"></div>
           <p>Loading financial data...</p>
         </div>
       )}
 
+      {/* Error state */}
+      {error && (
+        <div className="error-container">
+          <p>Error loading data: {error.message}</p>
+          <button onClick={fetchProperties} className="retry-button">Retry</button>
+        </div>
+      )}
+
       {/* Summary Cards */}
-      {!propertiesLoading && !reservationsLoading && (
+      {!loading && !error && (
         <div className="summary-cards">
           <div className="summary-card">
             <div className="card-content">
@@ -253,7 +348,7 @@ export const FinancialOverview = () => {
       )}
 
       {/* Property Performance */}
-      {!propertiesLoading && !reservationsLoading && (
+      {!loading && !error && (
         <div className="property-section">
           <h2 className="section-title">Property Performance</h2>
           {stats.length === 0 ? (
@@ -300,3 +395,5 @@ export const FinancialOverview = () => {
     </div>
   );
 };
+
+export default FinancialOverview;

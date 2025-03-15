@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CalendarPopup } from './CalendarPopup';
+import api from './api/api';
 import './Calendar.css';
 
 export const Calendar = () => {
@@ -7,6 +8,88 @@ export const Calendar = () => {
   const [selectedView, setSelectedView] = useState('month');
   const [showPrices, setShowPrices] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [properties, setProperties] = useState([]);
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [calendarData, setCalendarData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Fetch properties on component mount
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+  
+  // Fetch calendar data when property or month changes
+  useEffect(() => {
+    if (selectedProperty) {
+      fetchCalendarData();
+    }
+  }, [selectedProperty, currentMonth]);
+  
+  // Function to fetch properties
+  const fetchProperties = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const data = await api.getListings();
+      setProperties(data);
+      
+      // Set first property as selected by default
+      if (data.length > 0 && !selectedProperty) {
+        setSelectedProperty(data[0].id);
+      }
+      
+      setLoading(false);
+    } catch (err) {
+      setError(err);
+      setLoading(false);
+    }
+  };
+  
+  // Function to fetch calendar data
+  const fetchCalendarData = async () => {
+    if (!selectedProperty) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Calculate start and end date for the current month view
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      
+      // Get first day of month
+      const firstDayOfMonth = new Date(year, month, 1);
+      
+      // Get last day of month
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+      
+      // Extend dates to include days from previous/next month
+      const startDate = new Date(firstDayOfMonth);
+      startDate.setDate(startDate.getDate() - firstDayOfMonth.getDay());
+      
+      const endDate = new Date(lastDayOfMonth);
+      const daysToAdd = 6 - lastDayOfMonth.getDay();
+      endDate.setDate(endDate.getDate() + daysToAdd);
+      
+      // Format dates as YYYY-MM-DD
+      const formattedStartDate = startDate.toISOString().split('T')[0];
+      const formattedEndDate = endDate.toISOString().split('T')[0];
+      
+      // In a real app, we'd fetch this data from the API
+      // const data = await api.getCalendar(selectedProperty, formattedStartDate, formattedEndDate);
+      
+      // For now, we'll use the sample data function
+      const days = generateCalendarDays();
+      setCalendarData(days);
+      
+      setLoading(false);
+    } catch (err) {
+      setError(err);
+      setLoading(false);
+    }
+  };
   
   // Generate days for the calendar
   const generateCalendarDays = () => {
@@ -172,9 +255,6 @@ export const Calendar = () => {
     setSelectedBooking(null);
   };
   
-  // Generate the days for the calendar
-  const days = generateCalendarDays();
-  
   return (
     <div className="calendar-container">
       <div className="page-header">
@@ -185,128 +265,146 @@ export const Calendar = () => {
         </div>
       </div>
 
-      <div className="calendar-controls">
-        <div className="calendar-navigation">
-          <button className="nav-button" onClick={goToPreviousMonth}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-          </button>
-          <span className="current-month">{formatMonthYear(currentMonth)}</span>
-          <button className="nav-button" onClick={goToNextMonth}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </button>
+      {loading && (
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading calendar data...</p>
         </div>
-        
-        <div className="view-controls">
-          <button 
-            className="view-control-button" 
-            onClick={goToToday}
-          >
-            Today
-          </button>
-          <div className="view-toggle">
-            <button 
-              className={`view-toggle-button ${selectedView === 'month' ? 'active' : ''}`}
-              onClick={() => setSelectedView('month')}
-            >
-              Month
-            </button>
-            <button 
-              className={`view-toggle-button ${selectedView === 'week' ? 'active' : ''}`}
-              onClick={() => setSelectedView('week')}
-            >
-              Week
-            </button>
-          </div>
+      )}
+
+      {error && (
+        <div className="error-container">
+          <p>Error loading data: {error.message}</p>
+          <button onClick={fetchCalendarData} className="retry-button">Retry</button>
         </div>
-        
-        <div className="price-toggle">
-          <label className="toggle-label">
-            Prices
-            <div className="toggle-switch">
-              <input 
-                type="checkbox" 
-                checked={showPrices} 
-                onChange={() => setShowPrices(!showPrices)}
-              />
-              <span className="toggle-slider"></span>
+      )}
+
+      {!loading && !error && (
+        <>
+          <div className="calendar-controls">
+            <div className="calendar-navigation">
+              <button className="nav-button" onClick={goToPreviousMonth}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <span className="current-month">{formatMonthYear(currentMonth)}</span>
+              <button className="nav-button" onClick={goToNextMonth}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
             </div>
-          </label>
-          <button className="calendar-add-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </button>
-        </div>
-      </div>
-      
-      <div className="calendar-grid">
-        <div className="calendar-header">
-          <div className="calendar-day-header">Sun</div>
-          <div className="calendar-day-header">Mon</div>
-          <div className="calendar-day-header">Tue</div>
-          <div className="calendar-day-header">Wed</div>
-          <div className="calendar-day-header">Thu</div>
-          <div className="calendar-day-header">Fri</div>
-          <div className="calendar-day-header">Sat</div>
-        </div>
-        
-        <div className="calendar-body">
-          {days.map((day, index) => (
-            <div 
-              key={index} 
-              className={`calendar-cell ${!day.isCurrentMonth ? 'outside-month' : ''}`}
-            >
-              <div className="calendar-date">{day.date.getDate()}</div>
-              
-              {day.bookings.length > 0 && (
-                <div className="calendar-events">
-                  {day.bookings.map((booking) => (
-                    <div 
-                      key={booking.id}
-                      onClick={() => handleBookingClick(booking)}
-                      className={`calendar-event ${booking.type === 'ownerBlock' ? 'owner-block' : 'booking'}`}
-                    >
-                      {booking.type === 'booking' && (
-                        <div className="booking-info">
-                          <div className="guest-name">{booking.guestName}</div>
-                          <div className="booking-amount">${booking.amount.toFixed(2)}</div>
-                        </div>
-                      )}
-                      
-                      {booking.type === 'ownerBlock' && (
-                        <div className="owner-block-info">
-                          <div className="block-title">Owner Block</div>
-                          <div className="block-id">#{booking.blockId}</div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+            
+            <div className="view-controls">
+              <button 
+                className="view-control-button" 
+                onClick={goToToday}
+              >
+                Today
+              </button>
+              <div className="view-toggle">
+                <button 
+                  className={`view-toggle-button ${selectedView === 'month' ? 'active' : ''}`}
+                  onClick={() => setSelectedView('month')}
+                >
+                  Month
+                </button>
+                <button 
+                  className={`view-toggle-button ${selectedView === 'week' ? 'active' : ''}`}
+                  onClick={() => setSelectedView('week')}
+                >
+                  Week
+                </button>
+              </div>
+            </div>
+            
+            <div className="price-toggle">
+              <label className="toggle-label">
+                Prices
+                <div className="toggle-switch">
+                  <input 
+                    type="checkbox" 
+                    checked={showPrices} 
+                    onChange={() => setShowPrices(!showPrices)}
+                  />
+                  <span className="toggle-slider"></span>
                 </div>
-              )}
-              
-              {showPrices && day.isCurrentMonth && (
-                <div className="calendar-price">$700</div>
-              )}
+              </label>
+              <button className="calendar-add-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
             </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="calendar-legend">
-        <div className="legend-item">
-          <div className="legend-color blocked"></div>
-          <div className="legend-label">Blocked</div>
-        </div>
-        <div className="legend-item">
-          <div className="legend-color booked"></div>
-          <div className="legend-label">Booked</div>
-        </div>
-      </div>
+          </div>
+          
+          <div className="calendar-grid">
+            <div className="calendar-header">
+              <div className="calendar-day-header">Sun</div>
+              <div className="calendar-day-header">Mon</div>
+              <div className="calendar-day-header">Tue</div>
+              <div className="calendar-day-header">Wed</div>
+              <div className="calendar-day-header">Thu</div>
+              <div className="calendar-day-header">Fri</div>
+              <div className="calendar-day-header">Sat</div>
+            </div>
+            
+            <div className="calendar-body">
+              {calendarData.map((day, index) => (
+                <div 
+                  key={index} 
+                  className={`calendar-cell ${!day.isCurrentMonth ? 'outside-month' : ''}`}
+                >
+                  <div className="calendar-date">{day.date.getDate()}</div>
+                  
+                  {day.bookings.length > 0 && (
+                    <div className="calendar-events">
+                      {day.bookings.map((booking) => (
+                        <div 
+                          key={booking.id}
+                          onClick={() => handleBookingClick(booking)}
+                          className={`calendar-event ${booking.type === 'ownerBlock' ? 'owner-block' : 'booking'}`}
+                        >
+                          {booking.type === 'booking' && (
+                            <div className="booking-info">
+                              <div className="guest-name">{booking.guestName}</div>
+                              <div className="booking-amount">${booking.amount.toFixed(2)}</div>
+                            </div>
+                          )}
+                          
+                          {booking.type === 'ownerBlock' && (
+                            <div className="owner-block-info">
+                              <div className="block-title">Owner Block</div>
+                              <div className="block-id">#{booking.blockId}</div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {showPrices && day.isCurrentMonth && (
+                    <div className="calendar-price">$700</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="calendar-legend">
+            <div className="legend-item">
+              <div className="legend-color blocked"></div>
+              <div className="legend-label">Blocked</div>
+            </div>
+            <div className="legend-item">
+              <div className="legend-color booked"></div>
+              <div className="legend-label">Booked</div>
+            </div>
+          </div>
+        </>
+      )}
       
       {selectedBooking && (
         <CalendarPopup 

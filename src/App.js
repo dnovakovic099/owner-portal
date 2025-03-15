@@ -3,7 +3,7 @@ import { Navigation } from './Navigation';
 import { FinancialOverview } from './FinancialOverview';
 import { Reservations } from './Reservations';
 import { Calendar } from './Calendar';
-import hostawayApi from './api/hostawayApi';
+import api from './api/api';
 import './App.css';
 
 // Loading component
@@ -33,20 +33,17 @@ const App = () => {
   
   // Initialize API on mount
   useEffect(() => {
-    initializeApi();
+    checkApiHealth();
   }, []);
   
-  // Function to initialize API
-  const initializeApi = async () => {
+  // Function to check API health
+  const checkApiHealth = async () => {
     setInitializing(true);
     setError(null);
     
     try {
-      const success = await hostawayApi.initialize();
-      setApiReady(success);
-      if (!success) {
-        setError(new Error('Failed to initialize API'));
-      }
+      await api.checkHealth();
+      setApiReady(true);
     } catch (err) {
       setError(err);
       setApiReady(false);
@@ -67,7 +64,7 @@ const App = () => {
   
   // Show error if API initialization failed
   if (!apiReady) {
-    return <ApiError error={error} retry={initializeApi} />;
+    return <ApiError error={error} retry={checkApiHealth} />;
   }
 
   return (
