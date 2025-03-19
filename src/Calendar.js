@@ -9,6 +9,7 @@ export const Calendar = () => {
   const [properties, setProperties] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState('');
   const [calendarData, setCalendarData] = useState([]);
+  const [processedReservations, setProcessedReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoverReservation, setHoverReservation] = useState(null);
@@ -32,7 +33,6 @@ export const Calendar = () => {
     
     try {
       const data = await api.getListings();
-      console.log("Properties loaded:", data);
       
       // Make sure we have valid properties array
       const propertiesList = Array.isArray(data) ? data : [];
@@ -89,9 +89,13 @@ export const Calendar = () => {
         limit: 100
       });
       
-      // Generate calendar days with reservations
-      const days = generateCalendarDays(reservations || []);
-      setCalendarData(days);
+      // Generate calendar grid
+      const grid = generateCalendarGrid(startDate, endDate);
+      setCalendarData(grid);
+      
+      // Process reservations for display
+      const processed = processReservationsForDisplay(reservations || [], grid);
+      setProcessedReservations(processed);
       
     } catch (err) {
       console.error("Error fetching calendar data:", err);
@@ -101,132 +105,97 @@ export const Calendar = () => {
     }
   };
 
-  // Generate days for the calendar
-  const generateCalendarDays = (reservations = []) => {
-    const year = currentMonth.getFullYear();
+  // Generate calendar grid
+  const generateCalendarGrid = (startDate, endDate) => {
+    const grid = [];
+    const currentDate = new Date(startDate);
     const month = currentMonth.getMonth();
     
-    // Get first day of month and last day of month
-    const firstDayOfMonth = new Date(year, month, 1);
-    const lastDayOfMonth = new Date(year, month + 1, 0);
-    
-    // Get the day of the week for the first day (0 = Sunday, 6 = Saturday)
-    const firstDayOfWeek = firstDayOfMonth.getDay();
-    
-    // Calculate days from previous month to show
-    const daysFromPreviousMonth = firstDayOfWeek;
-    
-    // Calculate total days to display (previous month days + current month days)
-    const totalDaysToDisplay = daysFromPreviousMonth + lastDayOfMonth.getDate();
-    
-    // Calculate how many rows we need (each row has 7 days)
-    const rows = Math.ceil(totalDaysToDisplay / 7);
-    
-    // Calculate total cells needed (rows * 7)
-    const totalCells = rows * 7;
-    
-    const days = [];
-    
-    // Add days from previous month
-    const previousMonth = new Date(year, month - 1, 0);
-    const previousMonthLastDay = previousMonth.getDate();
-    
-    for (let i = 0; i < daysFromPreviousMonth; i++) {
-      const currentDate = new Date(year, month - 1, previousMonthLastDay - daysFromPreviousMonth + i + 1);
-      const dayReservations = getReservationsForDate(currentDate, reservations);
-      days.push({
-        date: currentDate,
-        isCurrentMonth: false,
-        reservations: dayReservations,
-        dayPrice: 700 // Default price
+    while (currentDate <= endDate) {
+      const date = new Date(currentDate);
+      grid.push({
+        date,
+        day: date.getDate(),
+        isCurrentMonth: date.getMonth() === month,
+        price: Math.floor(Math.random() * 100) + 200 // Random price for demo
       });
+      
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    // Add days from current month
-    for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
-      const currentDate = new Date(year, month, i);
-      const dayReservations = getReservationsForDate(currentDate, reservations);
-      days.push({
-        date: currentDate,
-        isCurrentMonth: true,
-        reservations: dayReservations,
-        dayPrice: 700 // Default price
-      });
-    }
-    
-    // Add days from next month
-    const remainingCells = totalCells - days.length;
-    for (let i = 1; i <= remainingCells; i++) {
-      const currentDate = new Date(year, month + 1, i);
-      const dayReservations = getReservationsForDate(currentDate, reservations);
-      days.push({
-        date: currentDate,
-        isCurrentMonth: false,
-        reservations: dayReservations,
-        dayPrice: 700 // Default price
-      });
-    }
-    
-    return days;
+    return grid;
   };
 
-  // Get reservations for a specific date
-  const getReservationsForDate = (date, reservations) => {
-    // Format the current date to midnight for comparison
-    const currentDate = new Date(date);
-    currentDate.setHours(0, 0, 0, 0);
+  // Process reservations for display
+  const processReservationsForDisplay = (rawReservations, grid) => {
+    // Create a map of dates to grid indexes
+    const dateToIndexMap = {};
+    grid.forEach((day, index) => {
+      const dateStr = day.date.toISOString().split('T')[0];
+      dateToIndexMap[dateStr] = index;
+    });
     
-    // Check if the date is in the past
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const isPast = currentDate < today;
-    
-    // Find all reservations that include this date
-    return reservations.filter(reservation => {
-      // Get the check-in and check-out dates
+    return rawReservations.map(reservation => {
+      // Get check-in and check-out dates
       const checkIn = new Date(reservation.arrivalDate || reservation.checkInDate);
       const checkOut = new Date(reservation.departureDate || reservation.checkOutDate);
       
-      // Reset hours to compare dates properly
+      // Reset hours for proper comparison
       checkIn.setHours(0, 0, 0, 0);
       checkOut.setHours(0, 0, 0, 0);
       
-      // Check if the current date falls within the reservation period
-      return currentDate >= checkIn && currentDate <= checkOut;
-    }).map(reservation => {
-      // Get the check-in and check-out dates
-      const checkIn = new Date(reservation.arrivalDate || reservation.checkInDate);
-      const checkOut = new Date(reservation.departureDate || reservation.checkOutDate);
+      // Check if reservation is in the past
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const isPast = checkOut < today;
       
-      // Reset hours to compare dates properly
-      checkIn.setHours(0, 0, 0, 0);
-      checkOut.setHours(0, 0, 0, 0);
+      // Choose color based on booking source
+      let color = '#ff385c'; // Default Airbnb red
+      const source = (reservation.source || reservation.channelName || '').toLowerCase();
       
-      // Calculate reservation position
-      let position = 'middle';
-      if (currentDate.getTime() === checkIn.getTime()) {
-        position = 'start';
-      }
-      if (currentDate.getTime() === checkOut.getTime()) {
-        position = 'end';
-      }
-      if (checkIn.getTime() === checkOut.getTime()) {
-        position = 'single';
+      if (source.includes('vrbo') || source.includes('homeaway')) {
+        color = '#3662d8'; // VRBO blue
+      } else if (source.includes('booking')) {
+        color = '#003580'; // Booking.com blue
+      } else if (source.includes('direct')) {
+        color = '#008489'; // Teal for direct bookings
       }
       
-      // Get initial from guest name
+      // If it's a past reservation, use gray
+      if (isPast) {
+        color = '#767676';
+      }
+      
+      // Get guest initial
       const guestName = reservation.guestName || 'Guest';
       const initial = guestName.charAt(0).toUpperCase();
       
+      // Find calendar grid indexes for this reservation
+      const startIndex = dateToIndexMap[checkIn.toISOString().split('T')[0]];
+      
+      // End date is exclusive in reservations, so subtract one day
+      const lastDay = new Date(checkOut);
+      lastDay.setDate(lastDay.getDate() - 1);
+      const endIndex = dateToIndexMap[lastDay.toISOString().split('T')[0]];
+      
+      // Calculate row based on other reservations
+      const row = 0; // We'll implement row calculations later
+      
       return {
         ...reservation,
-        position,
+        id: reservation.id || `res-${Math.random().toString(36).substr(2, 9)}`,
+        checkInDate: checkIn,
+        checkOutDate: checkOut,
         isPast,
+        color,
         initial,
-        // Ensure these properties exist
         guestCount: reservation.guestsCount || reservation.guests || 1,
-        amount: parseFloat(reservation.totalPrice) || 0,
-        color: isPast ? '#767676' : '#5E9E9F'
+        totalPrice: parseFloat(reservation.totalPrice) || 0,
+        nights: calculateNights(checkIn, checkOut),
+        // Grid placement
+        startIndex,
+        endIndex,
+        row
       };
     });
   };
@@ -281,6 +250,8 @@ export const Calendar = () => {
     if (reservation) {
       // Calculate position for hover card
       const rect = event.currentTarget.getBoundingClientRect();
+      
+      // Calculate position relative to viewport
       const hoverData = {
         ...reservation,
         position: {
@@ -293,6 +264,13 @@ export const Calendar = () => {
     } else {
       setHoverReservation(null);
     }
+  };
+
+  // Check if a day has reservations
+  const dayHasReservation = (index) => {
+    return processedReservations.some(
+      res => index >= res.startIndex && index <= res.endIndex
+    );
   };
 
   return (
@@ -343,13 +321,13 @@ export const Calendar = () => {
         <div className="calendar-view">
           <div className="calendar-header-bar">
             <div className="month-nav">
-              <button className="month-nav-button" onClick={goToPreviousMonth}>
+              <button className="month-nav-button" onClick={goToPreviousMonth} aria-label="Previous month">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M15 19L8 12L15 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
               <h2 className="month-display">{formatMonthYear(currentMonth)}</h2>
-              <button className="month-nav-button" onClick={goToNextMonth}>
+              <button className="month-nav-button" onClick={goToNextMonth} aria-label="Next month">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 5L16 12L9 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -384,7 +362,7 @@ export const Calendar = () => {
                   />
                   <span className="toggle-slider"></span>
                 </label>
-                <button className="add-btn">
+                <button className="add-btn" aria-label="Add">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -404,56 +382,134 @@ export const Calendar = () => {
               <div className="weekday">Sa</div>
             </div>
             
+            {/* Calendar grid - simplified layout */}
             <div className="calendar-grid">
               {calendarData.map((day, index) => (
                 <div 
                   key={index} 
                   className={`calendar-cell ${!day.isCurrentMonth ? 'outside-month' : ''}`}
+                  data-index={index}
                 >
-                  <div className="date-number">{day.date.getDate()}</div>
+                  <div className="date-number">{day.day}</div>
                   
-                  {day.reservations.length > 0 && day.reservations.map((reservation, resIndex) => {
-                    // Only render if this reservation has guest details
-                    if (reservation.guestName) {
-                      return (
-                        <div 
-                          key={`${reservation.id}-${resIndex}`}
-                          className="reservation-bar"
-                          style={{backgroundColor: reservation.color}}
-                          onMouseEnter={(e) => handleReservationHover(reservation, e)}
-                          onMouseLeave={() => handleReservationHover(null)}
-                        >
-                          <div className="guest-info">
-                            <div className="initial-circle">
-                              {reservation.initial}
-                            </div>
-                            <div className="reservation-info">
-                              <div className="guest-name">{reservation.guestName}</div>
-                              <div className="guest-count">{reservation.guestCount} guest{reservation.guestCount !== 1 ? 's' : ''}</div>
-                              <div className="reservation-amount">{formatCurrency(reservation.amount)}</div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    // If not a guest info cell but part of a reservation, render a bar
-                    return (
-                      <div 
-                        key={`${reservation.id}-${resIndex}`}
-                        className="reservation-bar"
-                        style={{backgroundColor: reservation.color}}
-                        onMouseEnter={(e) => handleReservationHover(reservation, e)}
-                        onMouseLeave={() => handleReservationHover(null)}
-                      />
-                    );
-                  })}
-                  
-                  {showPrices && day.isCurrentMonth && day.reservations.length === 0 && (
-                    <div className="day-price">{formatCurrency(day.dayPrice)}</div>
+                  {/* Show prices for available dates only */}
+                  {showPrices && day.isCurrentMonth && !dayHasReservation(index) && (
+                    <div className="day-price">{formatCurrency(day.price)}</div>
                   )}
                 </div>
               ))}
+            </div>
+            
+            {/* Overlay for reservations - this is the key change */}
+            <div className="reservations-overlay">
+              {processedReservations.map((reservation, index) => {
+                // Only render if we have valid start and end indexes
+                if (typeof reservation.startIndex !== 'number' || typeof reservation.endIndex !== 'number') {
+                  return null;
+                }
+                
+                // Calculate the width based on days
+                const width = (reservation.endIndex - reservation.startIndex + 1) * 100 / 7; // 7 days per row
+                
+                // Calculate which row this reservation is in (0-indexed)
+                const rowStart = Math.floor(reservation.startIndex / 7);
+                const rowEnd = Math.floor(reservation.endIndex / 7);
+                
+                // Multi-row reservation handling
+                if (rowStart !== rowEnd) {
+                  // For multi-row reservations, render separate segments
+                  const segments = [];
+                  
+                  // First row - from start to end of row
+                  const firstRowCellsLeft = 7 - (reservation.startIndex % 7);
+                  const firstRowWidth = firstRowCellsLeft * 100 / 7;
+                  segments.push({
+                    row: rowStart,
+                    startCol: reservation.startIndex % 7,
+                    width: firstRowWidth,
+                    type: 'start'
+                  });
+                  
+                  // Middle rows - full width
+                  for (let r = rowStart + 1; r < rowEnd; r++) {
+                    segments.push({
+                      row: r,
+                      startCol: 0,
+                      width: 100,
+                      type: 'middle'
+                    });
+                  }
+                  
+                  // Last row - from start of row to end
+                  const lastRowCells = (reservation.endIndex % 7) + 1;
+                  const lastRowWidth = lastRowCells * 100 / 7;
+                  segments.push({
+                    row: rowEnd,
+                    startCol: 0,
+                    width: lastRowWidth,
+                    type: 'end'
+                  });
+                  
+                  return segments.map((segment, segIndex) => (
+                    <div
+                      key={`${reservation.id}-segment-${segIndex}`}
+                      className={`reservation-bar ${segment.type}`}
+                      style={{
+                        backgroundColor: reservation.color,
+                        top: `calc(${segment.row} * (100% / 6) + 30px)`, // 6 rows total
+                        left: `calc(${segment.startCol} * (100% / 7))`,
+                        width: `calc(${segment.width}% - ${segment.type === 'end' ? 8 : 0}px)`,
+                        height: '32px'
+                      }}
+                      onMouseEnter={(e) => handleReservationHover(reservation, e)}
+                      onMouseLeave={() => handleReservationHover(null)}
+                    >
+                      {segment.type === 'start' && (
+                        <div className="guest-info">
+                          <div className="initial-circle">
+                            {reservation.initial}
+                          </div>
+                          <div className="reservation-info">
+                            <div className="guest-name">{reservation.guestName}</div>
+                            <div className="guest-count">
+                              {reservation.guestCount} guest{reservation.guestCount !== 1 ? 's' : ''}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ));
+                }
+                
+                // Single row reservation
+                return (
+                  <div
+                    key={`${reservation.id}-single-row`}
+                    className={`reservation-bar ${rowStart === rowEnd ? 'single-row' : ''}`}
+                    style={{
+                      backgroundColor: reservation.color,
+                      top: `calc(${rowStart} * (100% / 6) + 30px)`, // 6 rows total
+                      left: `calc(${reservation.startIndex % 7} * (100% / 7))`,
+                      width: `calc(${width}% - 8px)`,
+                      height: '32px'
+                    }}
+                    onMouseEnter={(e) => handleReservationHover(reservation, e)}
+                    onMouseLeave={() => handleReservationHover(null)}
+                  >
+                    <div className="guest-info">
+                      <div className="initial-circle">
+                        {reservation.initial}
+                      </div>
+                      <div className="reservation-info">
+                        <div className="guest-name">{reservation.guestName}</div>
+                        <div className="guest-count">
+                          {reservation.guestCount} guest{reservation.guestCount !== 1 ? 's' : ''}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -482,7 +538,7 @@ export const Calendar = () => {
               </div>
               <div className="guest-name-container">
                 <h4>{hoverReservation.guestName}</h4>
-                <span className="booking-source">{hoverReservation.bookingSource || 'Direct Booking'}</span>
+                <span className="booking-source">{hoverReservation.source || hoverReservation.channelName || 'Direct Booking'}</span>
               </div>
             </div>
           </div>
@@ -493,29 +549,24 @@ export const Calendar = () => {
                 <div className="detail-item">
                   <span className="detail-label">Check-in</span>
                   <span className="detail-value">
-                    {new Date(hoverReservation.checkInDate || hoverReservation.arrivalDate).toLocaleDateString()}
+                    {hoverReservation.checkInDate.toLocaleDateString()}
                   </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Check-out</span>
                   <span className="detail-value">
-                    {new Date(hoverReservation.checkOutDate || hoverReservation.departureDate).toLocaleDateString()}
+                    {hoverReservation.checkOutDate.toLocaleDateString()}
                   </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Nights</span>
-                  <span className="detail-value">
-                    {calculateNights(
-                      hoverReservation.checkInDate || hoverReservation.arrivalDate,
-                      hoverReservation.checkOutDate || hoverReservation.departureDate
-                    )}
-                  </span>
+                  <span className="detail-value">{hoverReservation.nights}</span>
                 </div>
               </div>
               
               <div className="price-row">
                 <span className="detail-label">Total</span>
-                <span className="total-price">{formatCurrency(hoverReservation.amount)}</span>
+                <span className="total-price">{formatCurrency(hoverReservation.totalPrice)}</span>
               </div>
             </div>
           </div>
@@ -524,3 +575,5 @@ export const Calendar = () => {
     </div>
   );
 };
+
+export default Calendar;

@@ -1,9 +1,22 @@
-/* Airbnb-style Calendar CSS - Final version */
+/* Condensed view for narrow reservations */
+.guest-info-condensed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.guest-info-condensed .initial-circle {
+  margin-right: 0;
+}/* Simplified Calendar CSS for continuous reservations */
+
+/* General styles */
 .calendar-container {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* Page header */
@@ -18,8 +31,8 @@
   font-size: 28px;
   font-weight: 600;
   color: #222;
-  position: relative;
   margin: 0;
+  position: relative;
   padding-bottom: 8px;
 }
 
@@ -39,24 +52,24 @@
 }
 
 .view-tab {
-  background-color: transparent;
-  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: #717171;
-  padding: 10px 16px;
+  background-color: transparent;
+  color: #484848;
+  border: none;
   cursor: pointer;
-  border-radius: 4px;
   transition: all 0.2s ease;
+}
+
+.view-tab:hover:not(.active) {
+  background-color: #f7f7f7;
 }
 
 .view-tab.active {
   background-color: #b39149;
   color: white;
-}
-
-.view-tab:hover:not(.active) {
-  background-color: #f7f7f7;
 }
 
 /* Property selector */
@@ -220,7 +233,7 @@
   right: 0;
   bottom: 0;
   background-color: #dddddd;
-  transition: .3s;
+  transition: 0.3s;
   border-radius: 20px;
 }
 
@@ -232,7 +245,7 @@
   left: 2px;
   bottom: 2px;
   background-color: white;
-  transition: .3s;
+  transition: 0.3s;
   border-radius: 50%;
 }
 
@@ -262,18 +275,21 @@ input:checked + .toggle-slider:before {
   background-color: #9a7d3e;
 }
 
-/* Calendar grid styling */
+/* Calendar grid with overlay */
 .airbnb-calendar {
   background-color: white;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  position: relative;
 }
 
 .weekday-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   background-color: white;
+  z-index: 3;
+  position: relative;
 }
 
 .weekday {
@@ -287,8 +303,9 @@ input:checked + .toggle-slider:before {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: minmax(110px, auto);
+  grid-template-rows: repeat(6, minmax(110px, auto));
   position: relative;
+  z-index: 1;
 }
 
 /* Calendar cells */
@@ -297,9 +314,7 @@ input:checked + .toggle-slider:before {
   border-top: 1px solid #ebebeb;
   border-right: 1px solid #ebebeb;
   padding: 8px;
-  transition: background-color 0.2s ease;
   min-height: 110px;
-  box-sizing: border-box;
 }
 
 .calendar-cell:hover {
@@ -315,8 +330,6 @@ input:checked + .toggle-slider:before {
   font-weight: 500;
   color: #222;
   margin-bottom: 6px;
-  position: relative;
-  z-index: 2;
 }
 
 .outside-month .date-number {
@@ -330,85 +343,117 @@ input:checked + .toggle-slider:before {
   position: absolute;
   bottom: 8px;
   right: 8px;
-  z-index: 1;
 }
 
-/* Reservation styling - to match the screenshot perfectly */
-.reservation-container {
+/* Reservation overlay - This is the key for continuous reservations */
+.reservations-overlay {
   position: absolute;
-  top: 30px;
+  top: 48px; /* Height of weekday header */
   left: 0;
   right: 0;
   bottom: 0;
-  padding-right: 0;
-  z-index: 1;
+  z-index: 2;
+  pointer-events: none;
 }
 
+/* Reservation bars */
 .reservation-bar {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  width: 100%;
-  background-color: #5E9E9F;
-  padding: 8px;
+  height: 32px;
+  background-color: #ff385c;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  color: white;
   overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
   box-sizing: border-box;
 }
 
-.reservation-bar.past {
-  background-color: #767676;
+.reservation-bar.start {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-right: -1px;
+  z-index: 3;
 }
 
-.reservation-bar.future {
-  background-color: #5E9E9F;
+.reservation-bar.middle {
+  border-radius: 0;
+  z-index: 2;
+}
+
+.reservation-bar.end {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -1px;
+  z-index: 3;
+}
+
+.reservation-bar.single-row {
+  border-radius: 4px;
+}
+
+/* Guest info styling */
+.guest-info {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  width: 100%;
 }
 
 .initial-circle {
   width: 24px;
   height: 24px;
+  min-width: 24px;
   border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: rgba(0, 0, 0, 0.1);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 600;
-  flex-shrink: 0;
   margin-right: 8px;
 }
 
 .reservation-info {
+  overflow: hidden;
+  flex: 1;
+  width: calc(100% - 32px);
+}
+
+.guest-name-row {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: white;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .guest-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: white;
-  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+  max-width: 65%;
 }
 
-.guest-info {
-  display: flex;
-  align-items: center;
-}
-
-.guest-count {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.reservation-amount {
+.guest-amount {
   font-size: 13px;
   font-weight: 600;
   color: white;
-  margin-top: 4px;
+  white-space: nowrap;
+}
+
+.guest-count {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* Hover card styling */
@@ -503,30 +548,6 @@ input:checked + .toggle-slider:before {
   color: #222;
 }
 
-.reservation-status {
-  display: inline-block;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.status-confirmed {
-  background-color: #e8f4ff;
-  color: #0071c2;
-}
-
-.status-completed {
-  background-color: #e8f8f0;
-  color: #008a5c;
-}
-
-.status-cancelled {
-  background-color: #fff0f0;
-  color: #e31c5f;
-}
-
 /* Loading and error states */
 .loading-container, .error-container, .empty-state {
   display: flex;
@@ -601,25 +622,30 @@ input:checked + .toggle-slider:before {
   }
   
   .calendar-grid {
-    grid-auto-rows: minmax(80px, auto);
+    grid-template-rows: repeat(6, minmax(80px, auto));
+  }
+  
+  .reservation-bar {
+    height: 28px;
   }
   
   .initial-circle {
     width: 20px;
     height: 20px;
-    font-size: 10px;
+    min-width: 20px;
+    font-size: 11px;
   }
   
   .guest-name, 
-  .guest-count, 
-  .reservation-amount {
+  .guest-count,
+  .guest-amount {
     font-size: 11px;
   }
 }
 
 @media (max-width: 768px) {
   .calendar-grid {
-    grid-auto-rows: minmax(60px, auto);
+    grid-template-rows: repeat(6, minmax(60px, auto));
   }
   
   .date-number {
@@ -630,18 +656,25 @@ input:checked + .toggle-slider:before {
     font-size: 11px;
   }
   
-  .reservation-container {
-    top: 25px;
-  }
-  
   .reservation-bar {
-    padding: 4px;
+    height: 24px;
   }
   
   .initial-circle {
     width: 18px;
     height: 18px;
+    min-width: 18px;
     font-size: 9px;
+    margin-right: 4px;
+  }
+  
+  .guest-name,
+  .guest-amount {
+    font-size: 10px;
+  }
+  
+  .guest-count {
+    display: none;
   }
   
   .reservation-details-card {
@@ -653,18 +686,18 @@ input:checked + .toggle-slider:before {
 
 @media (max-width: 480px) {
   .calendar-grid {
-    grid-auto-rows: minmax(50px, auto);
+    grid-template-rows: repeat(6, minmax(50px, auto));
   }
   
   .calendar-cell {
     padding: 4px;
   }
   
-  .reservation-container {
-    top: 20px;
+  .guest-name {
+    max-width: 60px;
   }
   
-  .reservation-bar {
-    padding: 2px;
+  .guest-count {
+    display: none;
   }
 }
