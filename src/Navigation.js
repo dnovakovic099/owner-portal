@@ -1,5 +1,7 @@
 import React from 'react';
 import './Navigation.css';
+import logoImage from './luxury-lodging-logo.png'; // Import the logo image
+
 
 export const Navigation = ({ currentPage, navigateTo }) => {
   return (
@@ -7,11 +9,9 @@ export const Navigation = ({ currentPage, navigateTo }) => {
       <div className="nav-container">
         <div className="nav-left">
           <div className="nav-brand">
-            <img 
-              src="/luxury-lodging-logo.png" 
-              alt="Luxury Lodging Host" 
-              className="brand-logo" 
-            />
+            {/* <div className="logo-container">
+              <img src={logoImage} alt="Luxury Lodging Host" className="logo" />
+            </div> */}
             <h1 className="brand-title">Owner Portal</h1>
           </div>
           <div className="nav-links">

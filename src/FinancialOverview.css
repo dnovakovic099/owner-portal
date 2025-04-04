@@ -145,18 +145,6 @@
   border-spacing: 0;
 }
 
-.data-table th {
-  padding: 1.2rem 1.5rem;
-  text-align: left;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  background-color: #f8f8f8;
-  border-bottom: 1px solid #eaeaea;
-}
 
 .data-table th:first-child {
   border-top-left-radius: 10px;

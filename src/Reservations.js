@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from './api/api';
 import './Reservations.css';
+import './ModernizedFilters.css';
+import logoImage from './luxury-lodging-logo.png'; // Import the logo image
 
 export const Reservations = () => {
   // Today's date as YYYY-MM-DD
@@ -64,7 +66,12 @@ export const Reservations = () => {
       const nameMap = {};
       if (propertiesList.length > 0) {
         propertiesList.forEach(property => {
-          nameMap[property.id] = property.name || `Property #${property.id}`;
+          // Make sure to use correct property name, not generic fallback
+          const name = property.name || 
+                      property.title || 
+                      property.propertyName || 
+                      `Property #${property.id}`;
+          nameMap[property.id] = name;
         });
         
         // Set first property as default if no property is selected
@@ -259,6 +266,46 @@ export const Reservations = () => {
     }
   };
   
+  // Format channel names
+  const formatChannelName = (platform) => {
+    if (!platform) return "Luxury Lodging Direct";
+    
+    const platformLower = platform.toLowerCase();
+    
+    if (platformLower.includes('airbnb')) {
+      return "Airbnb";
+    } else if (platformLower.includes('vrbo') || platformLower.includes('homeaway')) {
+      return "Vrbo";
+    } else if (platformLower.includes('booking')) {
+      return "Booking.com";
+    } else {
+      return "Luxury Lodging Direct";
+    }
+  };
+  
+  // Check if platform is Airbnb
+  const isAirbnb = (platform) => {
+    if (!platform) return false;
+    return platform.toLowerCase().includes('airbnb');
+  };
+  
+  // Get channel class for styling
+  const getChannelClass = (platform) => {
+    if (!platform) return "channel-luxury";
+    
+    const platformLower = platform.toLowerCase();
+    
+    if (platformLower.includes('airbnb')) {
+      return "channel-airbnb";
+    } else if (platformLower.includes('vrbo') || platformLower.includes('homeaway')) {
+      return "channel-vrbo";
+    } else if (platformLower.includes('booking')) {
+      return "channel-booking";
+    } else {
+      return "channel-luxury";
+    }
+  };
+  
   // Helper function to get guest name from various fields
   const getGuestName = (reservation) => {
     // First try to get the guestName directly
@@ -349,88 +396,75 @@ export const Reservations = () => {
     const diffTime = Math.abs(end - start);
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 0;
   };
-
-  // Icon component for export
-  const ExportIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-      <polyline points="7 10 12 15 17 10"></polyline>
-      <line x1="12" y1="15" x2="12" y2="3"></line>
-    </svg>
-  );
-
-  // Positive and negative indicator components
-  const PlusIndicator = () => (
-    <div className="report-data-indicator positive">+</div>
-  );
-
-  const MinusIndicator = () => (
-    <div className="report-data-indicator negative">−</div>
-  );
+  
+  // Get value class based on amount
+  const getValueClass = (amount, isFee = false) => {
+    const numericAmount = parseFloat(amount) || 0;
+    if (numericAmount === 0) return '';
+    
+    // Positive values are green, except fees which are red
+    return isFee ? 'negative-value' : 'positive-value';
+  };
 
   return (
-    <div className="reservations-container">
+    <div className="reservations-container wider-page">
       <div className="page-header">
         <h1 className="page-title">Reservations</h1>
       </div>
-
       <div className="reservations-filters">
-        <div className="filter-group">
-          <select
-            value={selectedProperty}
-            onChange={handlePropertyChange}
-            className="filter-select"
-            disabled={loading && properties.length === 0}
-          >
-            {properties.length === 0 ? (
-              <option value="">Loading properties...</option>
-            ) : (
-              properties.map(property => {
-                // Use consistent property name from our map
-                const propertyName = propertyNameMap[property.id] || property.name || `Property #${property.id}`;
-                return (
-                  <option key={property.id} value={property.id}>
-                    {propertyName}
-                  </option>
-                );
-              })
-            )}
-          </select>
+        <div className="filter-row">
+          <div className="filter-item">
+            <label htmlFor="property-select">Select Property</label>
+            <select
+              id="property-select"
+              value={selectedProperty}
+              onChange={handlePropertyChange}
+              className="filter-input"
+              disabled={loading && properties.length === 0}
+            >
+              {properties.length === 0 ? (
+                <option value="">Loading properties...</option>
+              ) : (
+                properties.map(property => {
+                  // Use consistent property name from our map
+                  console.log({ property })
+                  const propertyName = property.internalListingName || property.name || `Property #${property.id}`;
+                  return (
+                    <option key={property.id} value={property.id}>
+                      {propertyName}
+                    </option>
+                  );
+                })
+              )}
+            </select>
+          </div>
           
-          {/* Date range filters for check-in */}
-          <div className="date-range-filters">
-            <div className="date-filter">
-              <label htmlFor="startDate">Check-in From:</label>
-              <input
-                type="date"
-                id="startDate"
-                value={startDate}
-                onChange={handleStartDateChange}
-                className="date-input"
-              />
-            </div>
-            
-            <div className="date-filter">
-              <label htmlFor="endDate">Check-in To:</label>
-              <input
-                type="date"
-                id="endDate"
-                value={endDate}
-                onChange={handleEndDateChange}
-                className="date-input"
-              />
-            </div>
+          <div className="filter-item">
+            <label htmlFor="startDate">Check-in From</label>
+            <input
+              type="date"
+              id="startDate"
+              value={startDate}
+              onChange={handleStartDateChange}
+              className="filter-input"
+            />
+          </div>
+          
+          <div className="filter-item">
+            <label htmlFor="endDate">Check-in To</label>
+            <input
+              type="date"
+              id="endDate"
+              value={endDate}
+              onChange={handleEndDateChange}
+              className="filter-input"
+            />
           </div>
         </div>
-        
-        <button className="export-button">
-          <ExportIcon />
-          Export
-        </button>
       </div>
 
       {/* Reservations Table */}
-      <div className="table-container">
+      <div className="table-container wider-table">
         {loading ? (
           <div className="loading-indicator">
             <div className="spinner"></div>
@@ -445,21 +479,19 @@ export const Reservations = () => {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Platform</th>
-                <th>Guest</th>
-                <th>Property & Dates</th>
+                <th>Booking Information</th>
                 <th>Base Rate</th>
                 <th>Cleaning Fee</th>
+                <th>Tourism Tax</th>
                 <th>Pet Fee</th>
-                <th>Channel Fee</th>
-                <th>PM Fee</th>
+                <th>Fees</th>
                 <th>Total Payout</th>
               </tr>
             </thead>
             <tbody>
               {filteredReservations.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="no-data-cell">
+                  <td colSpan="7" className="no-data-cell">
                     <p>No reservations found with the current filters.</p>
                   </td>
                 </tr>
@@ -489,6 +521,19 @@ export const Reservations = () => {
                   const cleaningFee = parseFloat(finData.cleaningFeeValue) || 
                                      parseFloat(reservation.cleaningFee) || 0;
                   
+                  // Tourism tax from financial report
+                  const tourismTax = parseFloat(finData.totalTax) || 0;
+                  
+                  // Get platform/channel name
+                  const platform = finData.channelName || 
+                                  reservation.source || 
+                                  reservation.channelName || 'Direct';
+                  
+                  // Calculate payment processing fee (3% of first three columns)
+                  // Set to $0 for Airbnb reservations
+                  const paymentProcessingFee = isAirbnb(platform) ? 0 : 
+                                             (baseRate + cleaningFee + tourismTax) * 0.03;
+                  
                   // Pet fee might be in different fields, try to locate it
                   // In reality, this might be in a custom fee field or part of extraFees
                   const petFee = 0; // Add logic to extract pet fee when available
@@ -505,24 +550,22 @@ export const Reservations = () => {
                   // Check if we have financial report data
                   const hasFinancialData = !!finData.id;
                   
-                  // Get platform/channel name
-                  const platform = finData.channelName || 
-                                  reservation.source || 
-                                  reservation.channelName || 'Direct';
+                  // Get channel class for styling
+                  const channelClass = getChannelClass(platform);
+                  
+                  // Get guest name
+                  const guestName = getGuestName(reservation);
                   
                   return (
                     <tr key={reservation.id} className={loadingFinancials ? "loading-financial-data" : ""}>
-                      <td className="platform-cell">
-                        <div className="platform-name">{platform}</div>
-                      </td>
-                      <td className="guest-cell">
-                        <div className="guest-name">
-                          {getGuestName(reservation)}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="property-cell">
-                          <div className="property-name">{propertyName}</div>
+                      <td className="booking-info-cell">
+                        <div className="booking-info">
+                          <div className={`platform-name ${channelClass}`}>
+                            {formatChannelName(platform)}
+                          </div>
+                          <div className="guest-name-reso">
+                            {guestName}
+                          </div>
                           <div className="dates">
                             {formatDate(finData.arrivalDate || reservation.arrivalDate || reservation.checkInDate)} to {formatDate(finData.departureDate || reservation.departureDate || reservation.checkOutDate)}
                           </div>
@@ -530,29 +573,50 @@ export const Reservations = () => {
                         </div>
                       </td>
                       <td className="rate-cell">
-                        {formatCurrency(baseRate)}
-                        {hasFinancialData && baseRate > 0 && <PlusIndicator />}
+                        <span className={getValueClass(baseRate)}>
+                          {formatCurrency(baseRate)}
+                        </span>
                       </td>
                       <td className="fee-cell">
-                        {formatCurrency(cleaningFee)}
-                        {hasFinancialData && cleaningFee > 0 && <PlusIndicator />}
+                        <span className={getValueClass(cleaningFee)}>
+                          {formatCurrency(cleaningFee)}
+                        </span>
+                      </td>
+                      <td className="tax-cell">
+                        <span className={getValueClass(tourismTax)}>
+                          {formatCurrency(tourismTax)}
+                        </span>
                       </td>
                       <td className="pet-fee-cell">
-                        {formatCurrency(petFee)}
-                        {hasFinancialData && petFee > 0 && <PlusIndicator />}
+                        <span className={getValueClass(petFee)}>
+                          {formatCurrency(petFee)}
+                        </span>
                       </td>
-                      <td className="channel-fee-cell">
-                        {formatCurrency(hostChannelFee)}
-                        {hasFinancialData && hostChannelFee > 0 && <MinusIndicator />}
-                      </td>
-                      <td className="pm-fee-cell">
-                        {formatCurrency(pmFee)}
-                        {hasFinancialData && pmFee > 0 && <MinusIndicator />}
+                      <td className="combined-fees-cell">
+                        <div className="fee-breakdown">
+                          <div className="fee-item">
+                            <span className="fee-label">Processing Fee:</span>
+                            <span className={`fee-value ${getValueClass(paymentProcessingFee, true)}`}>
+                              {formatCurrency(paymentProcessingFee)}
+                            </span>
+                          </div>
+                          <div className="fee-item">
+                            <span className="fee-label">Channel Fee:</span>
+                            <span className={`fee-value ${getValueClass(hostChannelFee, true)}`}>
+                              {formatCurrency(hostChannelFee)}
+                            </span>
+                          </div>
+                          <div className="fee-item">
+                            <span className="fee-label">PM Fee:</span>
+                            <span className={`fee-value ${getValueClass(pmFee, true)}`}>
+                              {formatCurrency(pmFee)}
+                            </span>
+                          </div>
+                        </div>
                       </td>
                       <td className="owner-payout-cell">
-                        <div className={`payout-value ${hasFinancialData ? 'from-report' : ''}`}>
+                        <div className={`payout-value ${hasFinancialData ? 'from-report' : ''} ${getValueClass(ownerPayout)}`}>
                           {formatCurrency(ownerPayout)}
-                          {hasFinancialData && ownerPayout > 0 && <PlusIndicator />}
                         </div>
                       </td>
                     </tr>
