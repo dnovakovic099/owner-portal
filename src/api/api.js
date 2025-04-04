@@ -36,6 +36,37 @@ const apiRequest = async (endpoint, queryParams = {}) => {
 };
 
 /**
+ * Generic POST API request function
+ * @param {string} endpoint - API endpoint path
+ * @param {Object} data - Request body data
+ * @returns {Promise} - Promise resolving to API response data
+ */
+const apiPostRequest = async (endpoint, data = {}) => {
+  try {
+    const url = `${API_BASE_URL}${endpoint}`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error(`API POST request error for ${endpoint}:`, error);
+    throw error;
+  }
+};
+
+/**
  * API service with methods for different endpoints
  */
 const api = {
@@ -183,7 +214,51 @@ const api = {
       console.error('Failed to fetch calendar data:', error);
       return [];
     }
+  },
+
+
+/**
+ * Get consolidated financial report with proper form encoding
+ * @param {Object} params - Query parameters
+ * @param {Array} params.listingMapIds - Array of listing IDs to filter by
+ * @param {string} params.fromDate - Start date in YYYY-MM-DD format
+ * @param {string} params.toDate - End date in YYYY-MM-DD format
+ * @param {string} params.dateType - Type of date to filter by (arrivalDate, departureDate, etc.)
+ * @returns {Promise<Object>} Financial report data
+ */
+getFinancialReport: async (params = {}) => {
+  try {
+    // Create a proper form-encoded request
+    // In the browser environment, we'll use URLSearchParams to create form data
+    // but still send it as JSON since our proxy server will handle the conversion
+    
+    // We'll send the parameters as-is to our proxy server
+    // The server will convert them to the proper form-encoded format
+    const response = await fetch(`${API_BASE_URL}/finance/report/consolidated`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(params)
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching financial report:', error);
+    // Return empty results instead of throwing
+    return { 
+      result: {
+        rows: [],
+        columns: [] 
+      }
+    };
   }
-};
+}}
 
 export default api;

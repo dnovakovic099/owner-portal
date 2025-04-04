@@ -451,3 +451,507 @@
     overflow-x: auto;
   }
 }
+
+/* Add these styles to your Reservations.css file */
+
+/* Financial data badge */
+.financial-data-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  padding: 4px 8px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+  border-radius: 4px;
+}
+
+.financial-badge-icon {
+  margin-right: 4px;
+  font-weight: bold;
+}
+
+/* Source tag for financial data */
+.source-tag {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+/* Loading state for financial data */
+tr.loading-financial-data td {
+  position: relative;
+}
+
+tr.loading-financial-data .payout-cell::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 25%, rgba(79, 70, 229, 0.1) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: loading-shine 1.5s infinite;
+}
+
+@keyframes loading-shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Enhance owner payout styling */
+.owner-payout {
+  border-top: 1px dashed #e5e7eb;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.owner-payout .payout-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.owner-payout .payout-value {
+  color: #4f46e5;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* When financial data from report is available */
+.owner-payout-report {
+  background-color: rgba(79, 70, 229, 0.05);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border-left: 3px solid #4f46e5;
+}
+
+/* Add these styles to your Reservations.css file */
+
+/* Platform & Guest cell */
+.guest-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.platform-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4f46e5;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
+.guest-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--gray-800);
+}
+
+/* Property & Dates cell */
+.property-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.property-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 0.25rem;
+}
+
+.dates {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  margin-bottom: 0.125rem;
+}
+
+.nights {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+/* Styling for the fee cells */
+.rate-cell,
+.fee-cell,
+.pet-fee-cell,
+.pm-fee-cell {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--gray-800);
+  position: relative;
+  padding-right: 1.75rem !important;
+}
+
+/* Owner payout cell */
+.owner-payout-cell {
+  position: relative;
+  padding-right: 1.75rem !important;
+}
+
+.payout-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.payout-value.from-report {
+  color: #4f46e5;
+}
+
+/* Indicator for data from financial report */
+.report-data-indicator {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: #10b981;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+/* Loading state for financial data */
+tr.loading-financial-data td {
+  position: relative;
+}
+
+tr.loading-financial-data .rate-cell::after,
+tr.loading-financial-data .fee-cell::after,
+tr.loading-financial-data .pm-fee-cell::after,
+tr.loading-financial-data .owner-payout-cell::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 25%, rgba(79, 70, 229, 0.1) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: loading-shine 1.5s infinite;
+}
+
+@keyframes loading-shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Table layout */
+.data-table th {
+  white-space: nowrap;
+  font-size: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .data-table {
+    min-width: 900px;
+  }
+}
+
+/* Status indicators for reservation status */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3125rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.status-badge.confirmed {
+  background-color: rgba(79, 70, 229, 0.1);
+  color: var(--primary);
+}
+
+.status-badge.completed {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.status-badge.cancelled {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+/* Update these column width styles in your CSS file */
+
+/* Add styling for channel fee cell */
+.channel-fee-cell {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--gray-800);
+  position: relative;
+  padding-right: 1.75rem !important;
+  white-space: nowrap;
+}
+
+/* Updated column widths with channel fee */
+.data-table th:nth-child(1) { width: 8%; }  /* Platform */
+.data-table th:nth-child(2) { width: 12%; } /* Guest */
+.data-table th:nth-child(3) { width: 22%; } /* Property & Dates */
+.data-table th:nth-child(4) { width: 9%; }  /* Base Rate */
+.data-table th:nth-child(5) { width: 9%; }  /* Cleaning Fee */
+.data-table th:nth-child(6) { width: 8%; }  /* Pet Fee */
+.data-table th:nth-child(7) { width: 9%; }  /* Channel Fee */
+.data-table th:nth-child(8) { width: 9%; }  /* PM Fee */
+.data-table th:nth-child(9) { width: 10%; } /* Total Payout */
+
+/* Responsive adjustment */
+@media (max-width: 1280px) {
+  .data-table {
+    min-width: 1100px;
+  }
+}
+
+/* Updated indicator styling */
+.report-data-indicator {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Positive indicator (green plus) */
+.report-data-indicator.positive {
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+/* Negative indicator (red minus) */
+.report-data-indicator.negative {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Add these styles to your CSS for the date range filters */
+
+/* Date range filters container */
+.date-range-filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* Individual date filter */
+.date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-filter label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--gray-600);
+}
+
+/* Date input styling */
+.date-input {
+  padding: 8px 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  color: var(--gray-800);
+  background-color: white;
+  min-width: 140px;
+  transition: all 0.2s ease;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Style the date picker calendar icon */
+.date-input::-webkit-calendar-picker-indicator {
+  color: var(--gray-500);
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .date-range-filters {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .date-filter {
+    width: 100%;
+  }
+  
+  .date-input {
+    width: 100%;
+  }
+}
+
+/* Add to your Reservations.css file */
+
+/* Fixed dropdown height and padding */
+.filter-select {
+  padding: 0.5rem 2rem 0.5rem 0.75rem; /* Reduced padding */
+  height: 38px; /* Set a fixed height */
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background-color: var(--gray-50);
+  color: var(--gray-700);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 0.75rem) center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  max-height: 38px;
+  min-height: 38px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Updated filter group for cleaner layout without search */
+.filter-group {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start; /* Changed to flex-start to align items at top */
+  flex: 1;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+/* Simplified filters bar without search */
+.reservations-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem;
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+/* Adjust the date range filters container */
+.date-range-filters {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+/* Individual date filter */
+.date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-filter label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--gray-600);
+}
+
+/* Date input styling - fixed height to match select */
+.date-input {
+  padding: 0.5rem 0.75rem;
+  height: 38px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  color: var(--gray-800);
+  background-color: white;
+  min-width: 140px;
+  transition: all 0.2s ease;
+  line-height: 1.2;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Export button styling */
+.export-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  height: 38px;
+  background-color: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  color: var(--gray-700);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.export-button:hover {
+  background-color: var(--gray-50);
+  border-color: var(--gray-300);
+  color: var(--gray-900);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .reservations-filters {
+    flex-direction: column;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .date-range-filters {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .filter-select,
+  .date-input,
+  .export-button {
+    width: 100%;
+  }
+}
