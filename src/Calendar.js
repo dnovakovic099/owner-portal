@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
-import api from './api/api';
 import { processReservationsWithFinancials } from './utils/reservationFinancials';
+import api from './api/api';
 import './Calendar.css';
 
 export const Calendar = () => {
@@ -28,13 +27,6 @@ export const Calendar = () => {
       fetchCalendarData();
     }
   }, [selectedProperty, currentMonth]);
-  
-  // Fetch financial data when reservations are loaded
-  useEffect(() => {
-    if (selectedProperty && calendarData.length > 0) {
-      fetchFinancialData();
-    }
-  }, [selectedProperty, calendarData]);
   
   // Function to fetch properties
   const fetchProperties = async () => {
@@ -103,7 +95,7 @@ export const Calendar = () => {
       const grid = generateCalendarGrid(startDate, endDate);
       setCalendarData(grid);
       
-      // Process reservations for display without financial data initially
+      // Process reservations for display
       const processed = processReservationsForDisplay(reservations || [], grid);
       setProcessedReservations(processed);
       
@@ -112,46 +104,6 @@ export const Calendar = () => {
       setError(err);
     } finally {
       setLoading(false);
-    }
-  };
-  
-  // Fetch financial data for the period
-  const fetchFinancialData = async () => {
-    if (!selectedProperty) return;
-    
-    try {
-      // Use the same date range as calendar data
-      const year = currentMonth.getFullYear();
-      const month = currentMonth.getMonth();
-      
-      // Get first day of month
-      const firstDayOfMonth = new Date(year, month, 1);
-      
-      // Get last day of month
-      const lastDayOfMonth = new Date(year, month + 1, 0);
-      
-      // Fetch financial report
-      const financialReport = await api.getFinancialReport({
-        listingMapIds: [selectedProperty],
-        fromDate: firstDayOfMonth.toISOString().split('T')[0],
-        toDate: lastDayOfMonth.toISOString().split('T')[0],
-        dateType: 'arrivalDate'
-      });
-      
-      // Store financial report
-      setFinancialData(financialReport);
-      
-      // Process reservations with financial data
-      const processedWithFinancials = processReservationsWithFinancials(
-        processedReservations, 
-        financialReport
-      );
-      
-      setProcessedReservations(processedWithFinancials);
-      
-    } catch (err) {
-      console.error("Error fetching financial data:", err);
-      // Don't set error state as this is supplementary data
     }
   };
 
@@ -167,7 +119,7 @@ export const Calendar = () => {
         date,
         day: date.getDate(),
         isCurrentMonth: date.getMonth() === month,
-        price: 0 // Will be replaced by owner payout
+        price: Math.floor(Math.random() * 100) + 200 // Random price for demo
       });
       
       currentDate.setDate(currentDate.getDate() + 1);
@@ -205,7 +157,7 @@ export const Calendar = () => {
       
       if (source.includes('vrbo') || source.includes('homeaway')) {
         color = '#3662d8'; // VRBO blue
-      } else if (source.includes('booking')) {
+      } else if (source.includes('booking.com')) {
         color = '#003580'; // Booking.com blue
       } else if (source.includes('direct')) {
         color = '#008489'; // Teal for direct bookings
@@ -241,7 +193,6 @@ export const Calendar = () => {
         initial,
         guestCount: reservation.guestsCount || reservation.guests || 1,
         totalPrice: parseFloat(reservation.totalPrice) || 0,
-        ownerPayout: 0, // Will be updated by financial data
         nights: calculateNights(checkIn, checkOut),
         // Grid placement
         startIndex,
@@ -324,7 +275,6 @@ export const Calendar = () => {
     );
   };
 
-
   return (
     <div className="calendar-container">
       <div className="page-header">
@@ -332,6 +282,7 @@ export const Calendar = () => {
         
         <div className="view-tabs">
           <button className="view-tab active">Calendar</button>
+          {/* <button className="view-tab">Booking Report</button> */}
         </div>
       </div>
 
@@ -494,9 +445,9 @@ export const Calendar = () => {
                       className={`reservation-bar ${segment.type}`}
                       style={{
                         backgroundColor: reservation.color,
-                        top: `calc(${segment.row} * (100% / 6) + 40px)`, // 6 rows total
-                        left: `calc(${segment.startCol} * (100% / 5))`,
-                        width: `calc(${segment.width}% - 10)px)`,
+                        top: `calc(${segment.row} * (100% / 6) + 30px)`, // 6 rows total
+                        left: `calc(${segment.startCol} * (100% / 7))`,
+                        width: `calc(${segment.width}%}px)`,
                         height: '32px'
                       }}
                       onMouseEnter={(e) => handleReservationHover(reservation, e)}
@@ -523,9 +474,9 @@ export const Calendar = () => {
                     className={`reservation-bar ${rowStart === rowEnd ? 'single-row' : ''}`}
                     style={{
                       backgroundColor: reservation.color,
-                      top: `calc(${rowStart} * (100% / 6) + 40px)`, // 6 rows total, vertically centered
-                      left: `calc(${reservation.startIndex % 7} * (100% / 5))`,
-                      width: `calc(${width}% - 55px)`,
+                      top: `calc(${rowStart} * (100% / 6) + 30px)`, // 6 rows total, vertically centered
+                      left: `calc(${reservation.startIndex % 7} * (100% / 7))`,
+                      width: `calc(${width}%)`,
                       height: '32px'
                     }}
                     onMouseEnter={(e) => handleReservationHover(reservation, e)}
@@ -559,7 +510,7 @@ export const Calendar = () => {
         <div 
           className="reservation-details-card"
           style={{
-            top: `${hoverReservation.position.top + 5}px`,
+            top: `${hoverReservation.position.top + 40}px`,
             left: `${hoverReservation.position.left}px`
           }}
         >
