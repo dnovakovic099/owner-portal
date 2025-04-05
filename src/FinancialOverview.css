@@ -105,6 +105,7 @@
   font-size: 2.4rem;
   font-weight: 600;
   color: #333;
+  text-align: center;
 }
 
 .property-section {
@@ -145,9 +146,22 @@
   border-spacing: 0;
 }
 
+.data-table th {
+  padding: 1.2rem 1.5rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background-color: #f9f9f9;
+  border-bottom: 2px solid #eaeaea;
+  text-align: center;
+}
 
 .data-table th:first-child {
   border-top-left-radius: 10px;
+  text-align: left;
 }
 
 .data-table th:last-child {
@@ -161,6 +175,12 @@
   border-bottom: 1px solid #eaeaea;
   color: #333;
   transition: background-color 0.15s ease;
+  text-align: center;
+}
+
+/* First column (property) should be left-aligned */
+.data-table td:first-child {
+  text-align: left;
 }
 
 .property-cell {
@@ -190,4 +210,71 @@
 
 .data-table tr:last-child td:last-child {
   border-bottom-right-radius: 10px;
+}
+
+/* Loading container */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(156, 124, 56, 0.2);
+  border-top-color: #9c7c38;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error container */
+.error-container {
+  padding: 2rem;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.error-container p {
+  color: #d32f2f;
+  margin-bottom: 1rem;
+}
+
+.retry-button {
+  padding: 0.7rem 1.5rem;
+  background-color: #9c7c38;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retry-button:hover {
+  background-color: #866928;
+}
+
+/* No data message */
+.no-data {
+  padding: 2rem;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  color: #666;
 }

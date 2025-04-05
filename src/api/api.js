@@ -259,6 +259,50 @@ getFinancialReport: async (params = {}) => {
       }
     };
   }
+},
+
+
+/**
+ * Get listing financials report with property-level stats
+ * @param {Object} params - Query parameters
+ * @param {Array|string} params.listingMapIds - Array of listing IDs to filter by
+ * @param {string} params.fromDate - Start date in YYYY-MM-DD format
+ * @param {string} params.toDate - End date in YYYY-MM-DD format
+ * @param {string} params.dateType - Type of date to filter by (arrivalDate, departureDate, etc.)
+ * @returns {Promise<Object>} Financial report data
+ */
+getListingFinancials: async (params = {}) => {
+  try {
+    console.log("Calling listing financials endpoint with params:", params);
+    
+    // Use POST request to the listing financials endpoint
+    const response = await fetch(`${API_BASE_URL}/finance/report/listingFinancials`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(params)
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("Received listing financials data:", data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching listing financials report:', error);
+    // Return empty results instead of throwing
+    return { 
+      result: {
+        rows: [],
+        columns: [] 
+      }
+    };
+  }
 }}
 
 export default api;
