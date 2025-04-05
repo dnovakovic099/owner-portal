@@ -276,7 +276,7 @@ export const Reservations = () => {
       return "Airbnb";
     } else if (platformLower.includes('vrbo') || platformLower.includes('homeaway')) {
       return "Vrbo";
-    } else if (platformLower.includes('booking')) {
+    } else if (platformLower.includes('booking.com')) {
       return "Booking.com";
     } else {
       return "Luxury Lodging Direct";
@@ -299,7 +299,7 @@ export const Reservations = () => {
       return "channel-airbnb";
     } else if (platformLower.includes('vrbo') || platformLower.includes('homeaway')) {
       return "channel-vrbo";
-    } else if (platformLower.includes('booking')) {
+    } else if (platformLower.includes('booking.com')) {
       return "channel-booking";
     } else {
       return "channel-luxury";

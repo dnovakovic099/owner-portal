@@ -1,17 +1,19 @@
 import React from 'react';
 import './Navigation.css';
-import logoImage from './luxury-lodging-logo.png'; // Import the logo image
-
+import { useAuth } from './context/AuthContext';
 
 export const Navigation = ({ currentPage, navigateTo }) => {
+  const { user, logout } = useAuth();
+  
+  const handleLogout = () => {
+    logout();
+  };
+  
   return (
     <nav className="navigation">
       <div className="nav-container">
         <div className="nav-left">
           <div className="nav-brand">
-            {/* <div className="logo-container">
-              <img src={logoImage} alt="Luxury Lodging Host" className="logo" />
-            </div> */}
             <h1 className="brand-title">Owner Portal</h1>
           </div>
           <div className="nav-links">
@@ -36,8 +38,11 @@ export const Navigation = ({ currentPage, navigateTo }) => {
           </div>
         </div>
         <div className="nav-right">
-          <button className="profile-button">
-            Profile
+          <div className="user-info">
+            {user && <span className="user-email">{user.email}</span>}
+          </div>
+          <button onClick={handleLogout} className="logout-button">
+            Logout
           </button>
         </div>
       </div>

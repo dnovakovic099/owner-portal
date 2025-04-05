@@ -3,6 +3,8 @@ import { Navigation } from './Navigation';
 import { FinancialOverview } from './FinancialOverview';
 import { Reservations } from './Reservations';
 import { Calendar } from './Calendar';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import api from './api/api';
 import './App.css';
 
@@ -24,8 +26,8 @@ const ApiError = ({ error, retry }) => (
   </div>
 );
 
-// Main App component that controls navigation between pages
-const App = () => {
+// Main App content
+const AppContent = () => {
   const [currentPage, setCurrentPage] = useState('financial');
   const [apiReady, setApiReady] = useState(false);
   const [initializing, setInitializing] = useState(true);
@@ -42,9 +44,12 @@ const App = () => {
     setError(null);
     
     try {
+      console.log('Checking API health...');
       await api.checkHealth();
+      console.log('API health check passed');
       setApiReady(true);
     } catch (err) {
+      console.error('API health check failed:', err);
       setError(err);
       setApiReady(false);
     } finally {
@@ -76,6 +81,18 @@ const App = () => {
         {currentPage === 'calendar' && <Calendar />}
       </main>
     </div>
+  );
+};
+
+// Wrap the app with auth provider and protected route
+const App = () => {
+  console.log('App rendering');
+  return (
+    <AuthProvider>
+      <ProtectedRoute>
+        <AppContent />
+      </ProtectedRoute>
+    </AuthProvider>
   );
 };
 

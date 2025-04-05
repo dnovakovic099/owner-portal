@@ -2,6 +2,8 @@
  * Simplified API client for Hostaway API
  */
 
+import auth from './auth';
+
 // API base URL - using local proxy server
 const API_BASE_URL = 'http://localhost:3001/api';
 
@@ -21,7 +23,15 @@ const apiRequest = async (endpoint, queryParams = {}) => {
     
     const url = `${API_BASE_URL}${endpoint}?${queryString}`;
     
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: auth.getAuthHeaders()
+    });
+    
+    // Handle 401 Unauthorized
+    if (response.status === 401) {
+      auth.logout();
+      throw new Error('Your session has expired. Please login again.');
+    }
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -48,11 +58,18 @@ const apiPostRequest = async (endpoint, data = {}) => {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
+        ...auth.getAuthHeaders(),
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
       body: JSON.stringify(data)
     });
+    
+    // Handle 401 Unauthorized
+    if (response.status === 401) {
+      auth.logout();
+      throw new Error('Your session has expired. Please login again.');
+    }
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -70,6 +87,31 @@ const apiPostRequest = async (endpoint, data = {}) => {
  * API service with methods for different endpoints
  */
 const api = {
+  /**
+   * Login with email and password
+   * @param {string} email - User email
+   * @param {string} password - User password
+   * @returns {Promise<Object>} Login response
+   */
+  login: (email, password) => auth.login(email, password),
+  
+  /**
+   * Check if the user is authenticated
+   * @returns {boolean} Whether the user is authenticated
+   */
+  isAuthenticated: () => auth.isAuthenticated(),
+  
+  /**
+   * Logout the user
+   */
+  logout: () => auth.logout(),
+  
+  /**
+   * Get the current user
+   * @returns {Object|null} Current user or null
+   */
+  getCurrentUser: () => auth.getCurrentUser(),
+  
   /**
    * Check API health
    * @returns {Promise<Object>} Health check response
@@ -216,93 +258,100 @@ const api = {
     }
   },
 
-
-/**
- * Get consolidated financial report with proper form encoding
- * @param {Object} params - Query parameters
- * @param {Array} params.listingMapIds - Array of listing IDs to filter by
- * @param {string} params.fromDate - Start date in YYYY-MM-DD format
- * @param {string} params.toDate - End date in YYYY-MM-DD format
- * @param {string} params.dateType - Type of date to filter by (arrivalDate, departureDate, etc.)
- * @returns {Promise<Object>} Financial report data
- */
-getFinancialReport: async (params = {}) => {
-  try {
-    // Create a proper form-encoded request
-    // In the browser environment, we'll use URLSearchParams to create form data
-    // but still send it as JSON since our proxy server will handle the conversion
-    
-    // We'll send the parameters as-is to our proxy server
-    // The server will convert them to the proper form-encoded format
-    const response = await fetch(`${API_BASE_URL}/finance/report/consolidated`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(params)
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching financial report:', error);
-    // Return empty results instead of throwing
-    return { 
-      result: {
-        rows: [],
-        columns: [] 
+  /**
+   * Get consolidated financial report with proper form encoding
+   * @param {Object} params - Query parameters
+   * @param {Array} params.listingMapIds - Array of listing IDs to filter by
+   * @param {string} params.fromDate - Start date in YYYY-MM-DD format
+   * @param {string} params.toDate - End date in YYYY-MM-DD format
+   * @param {string} params.dateType - Type of date to filter by (arrivalDate, departureDate, etc.)
+   * @returns {Promise<Object>} Financial report data
+   */
+  getFinancialReport: async (params = {}) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/finance/report/consolidated`, {
+        method: 'POST',
+        headers: {
+          ...auth.getAuthHeaders(),
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(params)
+      });
+      
+      // Handle 401 Unauthorized
+      if (response.status === 401) {
+        auth.logout();
+        throw new Error('Your session has expired. Please login again.');
       }
-    };
-  }
-},
-
-
-/**
- * Get listing financials report with property-level stats
- * @param {Object} params - Query parameters
- * @param {Array|string} params.listingMapIds - Array of listing IDs to filter by
- * @param {string} params.fromDate - Start date in YYYY-MM-DD format
- * @param {string} params.toDate - End date in YYYY-MM-DD format
- * @param {string} params.dateType - Type of date to filter by (arrivalDate, departureDate, etc.)
- * @returns {Promise<Object>} Financial report data
- */
-getListingFinancials: async (params = {}) => {
-  try {
-    console.log("Calling listing financials endpoint with params:", params);
-    
-    // Use POST request to the listing financials endpoint
-    const response = await fetch(`${API_BASE_URL}/finance/report/listingFinancials`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(params)
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log("Received listing financials data:", data);
-    return data;
-  } catch (error) {
-    console.error('Error fetching listing financials report:', error);
-    // Return empty results instead of throwing
-    return { 
-      result: {
-        rows: [],
-        columns: [] 
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
       }
-    };
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching financial report:', error);
+      // Return empty results instead of throwing
+      return { 
+        result: {
+          rows: [],
+          columns: [] 
+        }
+      };
+    }
+  },
+
+  /**
+   * Get listing financials report with property-level stats
+   * @param {Object} params - Query parameters
+   * @param {Array|string} params.listingMapIds - Array of listing IDs to filter by
+   * @param {string} params.fromDate - Start date in YYYY-MM-DD format
+   * @param {string} params.toDate - End date in YYYY-MM-DD format
+   * @param {string} params.dateType - Type of date to filter by (arrivalDate, departureDate, etc.)
+   * @returns {Promise<Object>} Financial report data
+   */
+  getListingFinancials: async (params = {}) => {
+    try {
+      console.log("Calling listing financials endpoint with params:", params);
+      
+      // Use POST request to the listing financials endpoint
+      const response = await fetch(`${API_BASE_URL}/finance/report/listingFinancials`, {
+        method: 'POST',
+        headers: {
+          ...auth.getAuthHeaders(),
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(params)
+      });
+      
+      // Handle 401 Unauthorized
+      if (response.status === 401) {
+        auth.logout();
+        throw new Error('Your session has expired. Please login again.');
+      }
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Received listing financials data:", data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching listing financials report:', error);
+      // Return empty results instead of throwing
+      return { 
+        result: {
+          rows: [],
+          columns: [] 
+        }
+      };
+    }
   }
-}}
+};
 
 export default api;

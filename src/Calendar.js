@@ -155,7 +155,7 @@ export const Calendar = () => {
       
       if (source.includes('vrbo') || source.includes('homeaway')) {
         color = '#3662d8'; // VRBO blue
-      } else if (source.includes('booking')) {
+      } else if (source.includes('booking.com')) {
         color = '#003580'; // Booking.com blue
       } else if (source.includes('direct')) {
         color = '#008489'; // Teal for direct bookings
