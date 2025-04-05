@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import api from './api/api';
+import { processReservationsWithFinancials } from './utils/reservationFinancials';
 import './Calendar.css';
 
 export const Calendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedView, setSelectedView] = useState('month');
-  const [showPrices, setShowPrices] = useState(true);
+  const [showPrices, setShowPrices] = useState(false);
   const [properties, setProperties] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState('');
   const [calendarData, setCalendarData] = useState([]);
@@ -13,6 +15,7 @@ export const Calendar = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoverReservation, setHoverReservation] = useState(null);
+  const [financialData, setFinancialData] = useState(null);
   
   // Fetch properties on component mount
   useEffect(() => {
@@ -25,6 +28,13 @@ export const Calendar = () => {
       fetchCalendarData();
     }
   }, [selectedProperty, currentMonth]);
+  
+  // Fetch financial data when reservations are loaded
+  useEffect(() => {
+    if (selectedProperty && calendarData.length > 0) {
+      fetchFinancialData();
+    }
+  }, [selectedProperty, calendarData]);
   
   // Function to fetch properties
   const fetchProperties = async () => {
@@ -93,7 +103,7 @@ export const Calendar = () => {
       const grid = generateCalendarGrid(startDate, endDate);
       setCalendarData(grid);
       
-      // Process reservations for display
+      // Process reservations for display without financial data initially
       const processed = processReservationsForDisplay(reservations || [], grid);
       setProcessedReservations(processed);
       
@@ -102,6 +112,46 @@ export const Calendar = () => {
       setError(err);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // Fetch financial data for the period
+  const fetchFinancialData = async () => {
+    if (!selectedProperty) return;
+    
+    try {
+      // Use the same date range as calendar data
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      
+      // Get first day of month
+      const firstDayOfMonth = new Date(year, month, 1);
+      
+      // Get last day of month
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+      
+      // Fetch financial report
+      const financialReport = await api.getFinancialReport({
+        listingMapIds: [selectedProperty],
+        fromDate: firstDayOfMonth.toISOString().split('T')[0],
+        toDate: lastDayOfMonth.toISOString().split('T')[0],
+        dateType: 'arrivalDate'
+      });
+      
+      // Store financial report
+      setFinancialData(financialReport);
+      
+      // Process reservations with financial data
+      const processedWithFinancials = processReservationsWithFinancials(
+        processedReservations, 
+        financialReport
+      );
+      
+      setProcessedReservations(processedWithFinancials);
+      
+    } catch (err) {
+      console.error("Error fetching financial data:", err);
+      // Don't set error state as this is supplementary data
     }
   };
 
@@ -117,7 +167,7 @@ export const Calendar = () => {
         date,
         day: date.getDate(),
         isCurrentMonth: date.getMonth() === month,
-        price: Math.floor(Math.random() * 100) + 200 // Random price for demo
+        price: 0 // Will be replaced by owner payout
       });
       
       currentDate.setDate(currentDate.getDate() + 1);
@@ -155,7 +205,7 @@ export const Calendar = () => {
       
       if (source.includes('vrbo') || source.includes('homeaway')) {
         color = '#3662d8'; // VRBO blue
-      } else if (source.includes('booking.com')) {
+      } else if (source.includes('booking')) {
         color = '#003580'; // Booking.com blue
       } else if (source.includes('direct')) {
         color = '#008489'; // Teal for direct bookings
@@ -191,6 +241,7 @@ export const Calendar = () => {
         initial,
         guestCount: reservation.guestsCount || reservation.guests || 1,
         totalPrice: parseFloat(reservation.totalPrice) || 0,
+        ownerPayout: 0, // Will be updated by financial data
         nights: calculateNights(checkIn, checkOut),
         // Grid placement
         startIndex,
@@ -273,6 +324,7 @@ export const Calendar = () => {
     );
   };
 
+
   return (
     <div className="calendar-container">
       <div className="page-header">
@@ -280,7 +332,6 @@ export const Calendar = () => {
         
         <div className="view-tabs">
           <button className="view-tab active">Calendar</button>
-          <button className="view-tab">Booking Report</button>
         </div>
       </div>
 
@@ -344,29 +395,6 @@ export const Calendar = () => {
                 >
                   Month
                 </button>
-                <button 
-                  className={`view-btn ${selectedView === 'week' ? 'active' : ''}`}
-                  onClick={() => setSelectedView('week')}
-                >
-                  Week
-                </button>
-              </div>
-              
-              <div className="price-toggle">
-                <span>Prices</span>
-                <label className="toggle">
-                  <input 
-                    type="checkbox" 
-                    checked={showPrices} 
-                    onChange={() => setShowPrices(!showPrices)}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-                <button className="add-btn" aria-label="Add">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
               </div>
             </div>
           </div>
@@ -394,13 +422,23 @@ export const Calendar = () => {
                   
                   {/* Show prices for available dates only */}
                   {showPrices && day.isCurrentMonth && !dayHasReservation(index) && (
-                    <div className="day-price">{formatCurrency(day.price)}</div>
+                    <div className="day-price">
+                      {formatCurrency(
+                        processedReservations
+                          .filter(res => 
+                            res.startIndex <= index && 
+                            res.endIndex >= index && 
+                            res.ownerPayout
+                          )
+                          .reduce((sum, res) => sum + res.ownerPayout, 0) || 0
+                      )}
+                    </div>
                   )}
                 </div>
               ))}
             </div>
             
-            {/* Overlay for reservations - this is the key change */}
+            {/* Reservations overlay */}
             <div className="reservations-overlay">
               {processedReservations.map((reservation, index) => {
                 // Only render if we have valid start and end indexes
@@ -456,9 +494,9 @@ export const Calendar = () => {
                       className={`reservation-bar ${segment.type}`}
                       style={{
                         backgroundColor: reservation.color,
-                        top: `calc(${segment.row} * (100% / 6) + 30px)`, // 6 rows total
-                        left: `calc(${segment.startCol} * (100% / 7))`,
-                        width: `calc(${segment.width}% - ${segment.type === 'end' ? 8 : 0}px)`,
+                        top: `calc(${segment.row} * (100% / 6) + 40px)`, // 6 rows total
+                        left: `calc(${segment.startCol} * (100% / 5))`,
+                        width: `calc(${segment.width}% - 10)px)`,
                         height: '32px'
                       }}
                       onMouseEnter={(e) => handleReservationHover(reservation, e)}
@@ -471,9 +509,6 @@ export const Calendar = () => {
                           </div>
                           <div className="reservation-info">
                             <div className="guest-name">{reservation.guestName}</div>
-                            <div className="guest-count">
-                              {reservation.guestCount} guest{reservation.guestCount !== 1 ? 's' : ''}
-                            </div>
                           </div>
                         </div>
                       )}
@@ -488,9 +523,9 @@ export const Calendar = () => {
                     className={`reservation-bar ${rowStart === rowEnd ? 'single-row' : ''}`}
                     style={{
                       backgroundColor: reservation.color,
-                      top: `calc(${rowStart} * (100% / 6) + 30px)`, // 6 rows total
-                      left: `calc(${reservation.startIndex % 7} * (100% / 7))`,
-                      width: `calc(${width}% - 8px)`,
+                      top: `calc(${rowStart} * (100% / 6) + 40px)`, // 6 rows total, vertically centered
+                      left: `calc(${reservation.startIndex % 7} * (100% / 5))`,
+                      width: `calc(${width}% - 55px)`,
                       height: '32px'
                     }}
                     onMouseEnter={(e) => handleReservationHover(reservation, e)}
@@ -502,9 +537,6 @@ export const Calendar = () => {
                       </div>
                       <div className="reservation-info">
                         <div className="guest-name">{reservation.guestName}</div>
-                        <div className="guest-count">
-                          {reservation.guestCount} guest{reservation.guestCount !== 1 ? 's' : ''}
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -527,7 +559,7 @@ export const Calendar = () => {
         <div 
           className="reservation-details-card"
           style={{
-            top: `${hoverReservation.position.top + 40}px`,
+            top: `${hoverReservation.position.top + 5}px`,
             left: `${hoverReservation.position.left}px`
           }}
         >
@@ -538,7 +570,9 @@ export const Calendar = () => {
               </div>
               <div className="guest-name-container">
                 <h4>{hoverReservation.guestName}</h4>
-                <span className="booking-source">{hoverReservation.source || hoverReservation.channelName || 'Direct Booking'}</span>
+                <span className="booking-source">
+                  {hoverReservation.source || hoverReservation.channelName || 'Direct Booking'}
+                </span>
               </div>
             </div>
           </div>
@@ -565,8 +599,10 @@ export const Calendar = () => {
               </div>
               
               <div className="price-row">
-                <span className="detail-label">Total</span>
-                <span className="total-price">{formatCurrency(hoverReservation.totalPrice)}</span>
+                <span className="detail-label">Owner Payout</span>
+                <span className="total-price">
+                  {formatCurrency(hoverReservation.ownerPayout || 0)}
+                </span>
               </div>
             </div>
           </div>

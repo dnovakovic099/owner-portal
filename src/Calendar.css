@@ -361,7 +361,7 @@ input:checked + .toggle-slider:before {
   position: absolute;
   height: 32px;
   background-color: #ff385c;
-  border-radius: 4px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   padding-left: 8px;
@@ -700,4 +700,98 @@ input:checked + .toggle-slider:before {
   .guest-count {
     display: none;
   }
+}
+
+.reservation-bar {
+  position: absolute;
+  height: 22px; /* Reduced height */
+  background-color: #ff385c;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  color: white;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease;
+  top: calc(50% - 11px); /* Vertically center in the cell */
+}
+
+.reservation-bar:hover {
+  opacity: 0.9;
+}
+
+.reservation-bar.start {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  margin-right: -1px;
+  z-index: 3;
+}
+
+.reservation-bar.middle {
+  border-radius: 0;
+  z-index: 2;
+}
+
+.reservation-bar.end {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  margin-left: -1px;
+  z-index: 3;
+}
+
+.reservation-bar.single-row {
+  border-radius: 6px;
+}
+
+/* Guest info styling */
+.guest-info {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  width: 100%;
+}
+
+.initial-circle {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 8px;
+  text-transform: uppercase;
+}
+
+.reservation-info {
+  overflow: hidden;
+  flex: 1;
+  width: calc(100% - 32px);
+}
+
+.guest-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.guest-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }

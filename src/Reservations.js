@@ -299,7 +299,7 @@ export const Reservations = () => {
       return "channel-airbnb";
     } else if (platformLower.includes('vrbo') || platformLower.includes('homeaway')) {
       return "channel-vrbo";
-    } else if (platformLower.includes('booking.com')) {
+    } else if (platformLower.includes('booking.comg')) {
       return "channel-booking";
     } else {
       return "channel-luxury";
