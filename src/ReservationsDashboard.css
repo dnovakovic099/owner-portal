@@ -1,0 +1,140 @@
+/* Modern dashboard styling */
+.dashboard-container {
+  margin-bottom: 32px;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.dashboard-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.dashboard-card-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.dashboard-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+}
+
+/* Future payouts card styling */
+.dashboard-card.future {
+  background-color: #f9f8f5;
+  border: 1px solid rgba(179, 145, 73, 0.3);
+}
+
+.dashboard-card.future .dashboard-card-label {
+  color: #7a6331;
+}
+
+.dashboard-card.future .dashboard-card-value {
+  color: #b39149;
+}
+
+/* Loading states */
+.dashboard-card.loading {
+  animation: pulse 1.5s infinite;
+}
+
+.dashboard-card-label-skeleton {
+  height: 14px;
+  width: 60%;
+  background-color: #eee;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.dashboard-card-value-skeleton {
+  height: 28px;
+  width: 80%;
+  background-color: #eee;
+  border-radius: 4px;
+}
+
+.loading-indicator-small {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(179, 145, 73, 0.3);
+  border-top-color: #b39149;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* No data message */
+.no-data-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 24px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  color: #666;
+  font-size: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dashboard-cards {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  
+  .dashboard-card {
+    padding: 14px;
+  }
+  
+  .dashboard-card-label {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .dashboard-card-value {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .dashboard-card-value {
+    font-size: 20px;
+  }
+}

@@ -35,6 +35,12 @@ export const Navigation = ({ currentPage, navigateTo }) => {
             >
               Calendar
             </button>
+            <button
+              onClick={() => navigateTo('payouts')}
+              className={`nav-link ${currentPage === 'payouts' ? 'active' : ''}`}
+            >
+              Payouts
+            </button>
           </div>
         </div>
         <div className="nav-right">

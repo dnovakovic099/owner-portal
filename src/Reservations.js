@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from './api/api';
 import './Reservations.css';
 import './ModernizedFilters.css';
-import logoImage from './luxury-lodging-logo.png'; // Import the logo image
+import './ReservationsDashboard.css'; // Import dashboard styles
+import { ReservationsDashboard } from './ReservationsDashboard';
 
 export const Reservations = () => {
   // Today's date as YYYY-MM-DD
@@ -411,6 +412,7 @@ export const Reservations = () => {
       <div className="page-header">
         <h1 className="page-title">Reservations</h1>
       </div>
+      
       <div className="reservations-filters">
         <div className="filter-row">
           <div className="filter-item">
@@ -427,7 +429,6 @@ export const Reservations = () => {
               ) : (
                 properties.map(property => {
                   // Use consistent property name from our map
-                  console.log({ property })
                   const propertyName = property.internalListingName || property.name || `Property #${property.id}`;
                   return (
                     <option key={property.id} value={property.id}>
@@ -462,6 +463,27 @@ export const Reservations = () => {
           </div>
         </div>
       </div>
+      
+      {/* Dashboard Summary Section */}
+      <ReservationsDashboard 
+        reservations={filteredReservations.map(res => {
+          // Merge in financial data if available
+          const finData = financialData[res.id] || {};
+          return { 
+            ...res, 
+            ownerPayout: finData.ownerPayout || res.ownerPayout || 0,
+            baseRate: finData.baseRate || res.baseRate || 0,
+            cleaningFeeValue: finData.cleaningFeeValue || res.cleaningFee || 0,
+            weeklyDiscount: finData.weeklyDiscount || finData['weekly Discount'] || 0,
+            couponDiscount: finData.couponDiscount || finData['coupon Discount'] || 0,
+            monthlyDiscount: finData.monthlyDiscount || finData['monthly Discount'] || 0,
+            cancellationPayout: finData.cancellationPayout || finData['cancellation Payout'] || 0,
+            otherFees: finData.otherFees || finData['other Fees'] || 0
+          };
+        })}
+        loading={loading || loadingFinancials}
+        selectedProperty={selectedProperty}
+      />
 
       {/* Reservations Table */}
       <div className="table-container wider-table">
@@ -513,9 +535,15 @@ export const Reservations = () => {
                   const nights = reservation.nights || calculateNights(reservation.arrivalDate || reservation.checkInDate, 
                                                               reservation.departureDate || reservation.checkOutDate);
                   
-                  // Get base rate from financial report (preferred) or calculate
-                  const baseRate = parseFloat(finData.baseRate) || 
-                                 (parseFloat(reservation.totalPrice) - parseFloat(reservation.cleaningFee || 0)) / nights;
+                  // Get base rate from financial report with all components
+                  const baseRate = (
+                    parseFloat(finData.baseRate || 0) +
+                    parseFloat(finData.weeklyDiscount || finData['weekly Discount'] || 0) +
+                    parseFloat(finData.couponDiscount || finData['coupon Discount'] || 0) +
+                    parseFloat(finData.monthlyDiscount || finData['monthly Discount'] || 0) +
+                    parseFloat(finData.cancellationPayout || finData['cancellation Payout'] || 0) +
+                    parseFloat(finData.otherFees || finData['other Fees'] || 0)
+                  ) || (parseFloat(reservation.totalPrice) - parseFloat(reservation.cleaningFee || 0)) / nights;
                   
                   // Get cleaning fee from financial report or reservation
                   const cleaningFee = parseFloat(finData.cleaningFeeValue) || 
