@@ -13,8 +13,11 @@
 
 /* General styles */
 .calendar-container {
-  width: 100%;
-  max-width: 1400px;
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  max-width: 1200px;
   margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
@@ -25,81 +28,66 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eaeaea;
 }
 
 .page-title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
-  color: #222;
+  color: #333;
   margin: 0;
-  position: relative;
-  padding-bottom: 8px;
-}
-
-.page-title::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 50px;
-  height: 3px;
-  background-color: #b39149;
 }
 
 .view-tabs {
   display: flex;
-  gap: 10px;
 }
 
 .view-tab {
   padding: 8px 16px;
-  border-radius: 8px;
+  background: transparent;
+  border: none;
   font-size: 14px;
   font-weight: 500;
-  background-color: transparent;
-  color: #484848;
-  border: none;
+  color: #666;
   cursor: pointer;
+  border-radius: 8px;
   transition: all 0.2s ease;
 }
 
-.view-tab:hover:not(.active) {
-  background-color: #f7f7f7;
-}
-
 .view-tab.active {
-  background-color: #b39149;
-  color: white;
+  background-color: #f5f5f5;
+  color: #333;
+  font-weight: 600;
 }
 
 /* Property selector */
 .property-selector {
   margin-bottom: 24px;
-  width: 100%;
 }
 
 .property-select-wrapper {
   position: relative;
-  max-width: 360px;
+  width: 100%;
+  max-width: 400px;
 }
 
 .property-select {
   width: 100%;
   padding: 12px 16px;
-  padding-right: 40px;
-  font-size: 14px;
-  color: #222;
+  font-size: 15px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  background-color: white;
   appearance: none;
-  cursor: pointer;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .property-select:focus {
   outline: none;
-  border-color: #b39149;
-  box-shadow: 0 0 0 2px rgba(179, 145, 73, 0.2);
+  border-color: #b4b4b4;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
 }
 
 .select-arrow {
@@ -107,8 +95,8 @@
   right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #717171;
   font-size: 10px;
+  color: #666;
   pointer-events: none;
 }
 
@@ -117,63 +105,61 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 0 8px;
+  padding: 16px 20px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eaeaea;
 }
 
 .month-nav {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .month-nav-button {
-  width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: white;
-  border: 1px solid #ddd;
+  width: 36px;
+  height: 36px;
+  background-color: #fff;
+  border: 1px solid #eaeaea;
   border-radius: 50%;
-  color: #222;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .month-nav-button:hover {
-  background-color: #f7f7f7;
-  border-color: #b39149;
+  background-color: #f5f5f5;
 }
 
 .month-display {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 600;
-  color: #222;
   margin: 0;
+  min-width: 160px;
+  text-align: center;
 }
 
 .calendar-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .today-btn {
   padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #222;
-  background-color: white;
+  background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .today-btn:hover {
-  background-color: #f7f7f7;
-  border-color: #b39149;
+  background-color: #f5f5f5;
 }
 
 .view-selector {
@@ -185,287 +171,209 @@
 
 .view-btn {
   padding: 8px 16px;
+  background-color: #fff;
+  border: none;
   font-size: 14px;
   font-weight: 500;
-  background-color: white;
-  color: #717171;
-  border: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .view-btn.active {
-  background-color: #b39149;
-  color: white;
+  background-color: #f0f0f0;
+  font-weight: 600;
 }
 
-.view-btn:not(.active):hover {
-  background-color: #f7f7f7;
-}
-
-.price-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: #717171;
-}
-
-/* Toggle switch */
-.toggle {
-  position: relative;
-  display: inline-block;
-  width: 38px;
-  height: 20px;
-}
-
-.toggle input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #dddddd;
-  transition: 0.3s;
-  border-radius: 20px;
-}
-
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
-}
-
-input:checked + .toggle-slider {
-  background-color: #b39149;
-}
-
-input:checked + .toggle-slider:before {
-  transform: translateX(18px);
-}
-
-.add-btn {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #b39149;
-  border: none;
-  border-radius: 50%;
-  color: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.add-btn:hover {
-  background-color: #9a7d3e;
-}
-
-/* Calendar grid with overlay */
-.airbnb-calendar {
-  background-color: white;
-  border-radius: 12px;
+/* Calendar view */
+.calendar-view {
+  background-color: #fff;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #eaeaea;
+  margin-bottom: 30px;
   position: relative;
 }
 
+/* Airbnb calendar */
+.airbnb-calendar {
+  position: relative;
+  padding: 0;
+}
+
+/* Weekday header */
 .weekday-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background-color: white;
-  z-index: 3;
-  position: relative;
+  margin-bottom: 0;
+  padding: 12px 0;
+  background-color: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
 .weekday {
-  padding: 12px 0;
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  color: #717171;
+  color: #666;
 }
 
+/* Calendar grid */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: repeat(6, minmax(110px, auto));
-  position: relative;
-  z-index: 1;
+  grid-template-rows: repeat(6, minmax(100px, auto));
+  background-color: #fff;
+  border-radius: 0;
+  overflow: hidden;
+  border-top: 1px solid #eaeaea;
 }
 
-/* Calendar cells */
+/* Calendar cell */
 .calendar-cell {
   position: relative;
-  border-top: 1px solid #ebebeb;
-  border-right: 1px solid #ebebeb;
+  min-height: 100px;
+  background-color: #fff;
   padding: 8px;
-  min-height: 110px;
+  transition: background-color 0.2s ease;
+  border-right: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .calendar-cell:hover {
-  background-color: #f7f7f7;
+  background-color: #f9f9f9;
 }
 
 .calendar-cell.outside-month {
-  background-color: #f8f8f8;
+  background-color: #fafafa;
+}
+
+.calendar-cell.outside-month .date-number {
+  color: #bbb;
 }
 
 .date-number {
   font-size: 14px;
   font-weight: 500;
-  color: #222;
-  margin-bottom: 6px;
+  color: #333;
 }
 
-.outside-month .date-number {
-  color: #bbbbbb;
-}
-
-.day-price {
-  font-size: 13px;
-  font-weight: 500;
-  color: #717171;
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-}
-
-/* Reservation overlay - This is the key for continuous reservations */
+/* Reservations overlay */
 .reservations-overlay {
   position: absolute;
-  top: 48px; /* Height of weekday header */
+  top: 48px; /* Match the weekday header height */
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 2;
+  width: 100%;
+  height: calc(100% - 48px);
   pointer-events: none;
+  z-index: 10;
 }
 
-/* Reservation bars */
 .reservation-bar {
   position: absolute;
-  height: 32px;
-  background-color: #ff385c;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  padding-left: 8px;
-  color: white;
-  overflow: hidden;
-  white-space: nowrap;
-  cursor: pointer;
+  border-radius: 4px;
   pointer-events: auto;
-  box-sizing: border-box;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 2;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 36px !important;
 }
 
+/* Specific styles for different segment types */
 .reservation-bar.start {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
-  margin-right: -1px;
-  z-index: 3;
 }
 
 .reservation-bar.middle {
   border-radius: 0;
-  z-index: 2;
 }
 
 .reservation-bar.end {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  margin-left: -1px;
-  z-index: 3;
 }
 
-.reservation-bar.single-row {
+.reservation-bar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+}
+
+/* Improved styling for multi-row reservations */
+.reservation-bar.start,
+.reservation-bar.end,
+.reservation-bar.middle {
+  z-index: 5;
+}
+
+/* Owner payout styling */
+.owner-payout {
+  margin-left: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
   border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.15);
+  color: #ffffff;
+  font-size: 12px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Guest info styling */
 .guest-info {
   display: flex;
   align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  color: #fff;
+  height: 100%;
+  font-size: 13px;
+  white-space: nowrap;
   overflow: hidden;
-  pointer-events: none;
-  width: 100%;
+  text-overflow: ellipsis;
+  z-index: 2;
 }
 
 .initial-circle {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.1);
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
   font-size: 12px;
   font-weight: 600;
-  margin-right: 8px;
 }
 
 .reservation-info {
   overflow: hidden;
-  flex: 1;
-  width: calc(100% - 32px);
-}
-
-.guest-name-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
 }
 
 .guest-name {
-  font-size: 13px;
   font-weight: 500;
-  color: white;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-right: 8px;
-  max-width: 65%;
 }
 
-.guest-amount {
-  font-size: 13px;
-  font-weight: 600;
-  color: white;
-  white-space: nowrap;
-}
-
-.guest-count {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-/* Hover card styling */
+/* Reservation hover card */
 .reservation-details-card {
   position: fixed;
-  width: 280px;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+  width: 300px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 100;
   overflow: hidden;
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.2s ease forwards;
 }
 
 @keyframes fadeIn {
@@ -475,7 +383,8 @@ input:checked + .toggle-slider:before {
 
 .card-header {
   padding: 16px;
-  border-bottom: 1px solid #ebebeb;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eaeaea;
 }
 
 .guest-profile {
@@ -484,20 +393,22 @@ input:checked + .toggle-slider:before {
   gap: 12px;
 }
 
-.guest-name-container {
-  flex: 1;
+.guest-profile .initial-circle {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+  color: #fff;
 }
 
 .guest-name-container h4 {
-  margin: 0 0 4px 0;
+  margin: 0 0 4px;
   font-size: 16px;
   font-weight: 600;
-  color: #222;
 }
 
 .booking-source {
-  font-size: 12px;
-  color: #717171;
+  font-size: 13px;
+  color: #666;
 }
 
 .card-body {
@@ -513,11 +424,9 @@ input:checked + .toggle-slider:before {
 .detail-row {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
 }
 
 .detail-item {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -525,27 +434,27 @@ input:checked + .toggle-slider:before {
 
 .detail-label {
   font-size: 12px;
-  color: #717171;
+  color: #666;
 }
 
 .detail-value {
   font-size: 14px;
   font-weight: 500;
-  color: #222;
 }
 
 .price-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #ebebeb;
+  margin-top: 8px;
   padding-top: 12px;
+  border-top: 1px solid #eaeaea;
 }
 
 .total-price {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
-  color: #222;
+  color: #2a2a2a;
 }
 
 /* Loading and error states */
@@ -556,18 +465,19 @@ input:checked + .toggle-slider:before {
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  background-color: #fafafa;
+  border: 1px solid #eaeaea;
+  margin-top: 20px;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(179, 145, 73, 0.2);
-  border-top-color: #b39149;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #666;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 1s linear infinite;
   margin-bottom: 20px;
 }
 
@@ -575,37 +485,33 @@ input:checked + .toggle-slider:before {
   to { transform: rotate(360deg); }
 }
 
-.error-container p {
-  color: #e31c5f;
-  margin-bottom: 20px;
-}
-
 .retry-button {
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  background-color: #b39149;
+  margin-top: 16px;
+  padding: 8px 16px;
+  background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
   transition: background-color 0.2s ease;
 }
 
 .retry-button:hover {
-  background-color: #9a7d3e;
+  background-color: #0069d9;
 }
 
 .empty-state h3 {
+  margin: 0 0 12px;
   font-size: 18px;
   font-weight: 600;
-  color: #222;
-  margin-bottom: 8px;
 }
 
 .empty-state p {
-  color: #717171;
-  font-size: 14px;
+  color: #666;
+  max-width: 400px;
+  margin: 0;
 }
 
 /* Responsive styling */
@@ -700,98 +606,4 @@ input:checked + .toggle-slider:before {
   .guest-count {
     display: none;
   }
-}
-
-.reservation-bar {
-  position: absolute;
-  height: 22px; /* Reduced height */
-  background-color: #ff385c;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  color: white;
-  overflow: hidden;
-  white-space: nowrap;
-  cursor: pointer;
-  pointer-events: auto;
-  box-sizing: border-box;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.2s ease;
-  top: calc(50% - 11px); /* Vertically center in the cell */
-}
-
-.reservation-bar:hover {
-  opacity: 0.9;
-}
-
-.reservation-bar.start {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-  margin-right: -1px;
-  z-index: 3;
-}
-
-.reservation-bar.middle {
-  border-radius: 0;
-  z-index: 2;
-}
-
-.reservation-bar.end {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-  margin-left: -1px;
-  z-index: 3;
-}
-
-.reservation-bar.single-row {
-  border-radius: 6px;
-}
-
-/* Guest info styling */
-.guest-info {
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  pointer-events: none;
-  width: 100%;
-}
-
-.initial-circle {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.2);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  margin-right: 8px;
-  text-transform: uppercase;
-}
-
-.reservation-info {
-  overflow: hidden;
-  flex: 1;
-  width: calc(100% - 32px);
-}
-
-.guest-name-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.guest-name {
-  font-size: 12px;
-  font-weight: 500;
-  color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
 }

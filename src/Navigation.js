@@ -14,32 +14,38 @@ export const Navigation = ({ currentPage, navigateTo }) => {
       <div className="nav-container">
         <div className="nav-left">
           <div className="nav-brand">
-            <h1 className="brand-title">Owner Portal</h1>
+            <div className="app-logo"></div>
           </div>
           <div className="nav-links">
             <button
               onClick={() => navigateTo('financial')}
               className={`nav-link ${currentPage === 'financial' ? 'active' : ''}`}
             >
-              Financial Overview
+              FINANCIAL OVERVIEW
             </button>
             <button
               onClick={() => navigateTo('reservations')}
               className={`nav-link ${currentPage === 'reservations' ? 'active' : ''}`}
             >
-              Reservations
+              RESERVATIONS
             </button>
             <button
               onClick={() => navigateTo('calendar')}
               className={`nav-link ${currentPage === 'calendar' ? 'active' : ''}`}
             >
-              Calendar
+              CALENDAR
             </button>
             <button
               onClick={() => navigateTo('payouts')}
               className={`nav-link ${currentPage === 'payouts' ? 'active' : ''}`}
             >
-              Payouts
+              PAYOUTS
+            </button>
+            <button
+              onClick={() => navigateTo('referrals')}
+              className={`nav-link ${currentPage === 'referrals' ? 'active' : ''}`}
+            >
+              REFERRALS
             </button>
           </div>
         </div>
@@ -48,7 +54,7 @@ export const Navigation = ({ currentPage, navigateTo }) => {
             {user && <span className="user-email">{user.email}</span>}
           </div>
           <button onClick={handleLogout} className="logout-button">
-            Logout
+            LOGOUT
           </button>
         </div>
       </div>

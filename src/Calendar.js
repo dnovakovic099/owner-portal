@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { processReservationsWithFinancials } from './utils/reservationFinancials';
 import api from './api/api';
 import './Calendar.css';
@@ -15,6 +15,7 @@ export const Calendar = () => {
   const [error, setError] = useState(null);
   const [hoverReservation, setHoverReservation] = useState(null);
   const [financialData, setFinancialData] = useState(null);
+  const hoverTimeoutRef = useRef(null);
   
   // Fetch properties on component mount
   useEffect(() => {
@@ -24,9 +25,10 @@ export const Calendar = () => {
   // Fetch calendar data when property or month changes
   useEffect(() => {
     if (selectedProperty) {
+      console.log('Fetching calendar data for property:', selectedProperty);
       fetchCalendarData();
     }
-  }, [selectedProperty, currentMonth]);
+  }, [selectedProperty, currentMonth.getMonth(), currentMonth.getFullYear()]); // Only re-run when these specific values change
   
   // Function to fetch properties
   const fetchProperties = async () => {
@@ -55,7 +57,10 @@ export const Calendar = () => {
   
   // Function to fetch calendar data
   const fetchCalendarData = async () => {
-    if (!selectedProperty) return;
+    if (!selectedProperty) {
+      console.warn("No property selected, cannot fetch calendar data");
+      return;
+    }
     
     setLoading(true);
     setError(null);
@@ -83,6 +88,8 @@ export const Calendar = () => {
       const formattedStartDate = startDate.toISOString().split('T')[0];
       const formattedEndDate = endDate.toISOString().split('T')[0];
       
+      console.log(`Fetching data for property ID: ${selectedProperty} from ${formattedStartDate} to ${formattedEndDate}`);
+      
       // Fetch reservations for this date range
       const { reservations } = await api.getReservations({
         listingId: selectedProperty,
@@ -91,12 +98,30 @@ export const Calendar = () => {
         limit: 100
       });
       
+      // Fetch financial report data for proper owner payout info
+      let financialReport = null;
+      try {
+        financialReport = await api.getFinancialReport({
+          listingMapIds: [selectedProperty],
+          startDate: formattedStartDate,
+          endDate: formattedEndDate
+        });
+        
+        console.log('Financial report fetched successfully');
+      } catch (financialError) {
+        console.error("Error fetching financial report:", financialError);
+        // Continue without financial data
+      }
+      
+      // Process reservation financials with the financial report data
+      const reservationsWithFinancials = await processReservationsWithFinancials(reservations || [], financialReport);
+      
       // Generate calendar grid
       const grid = generateCalendarGrid(startDate, endDate);
       setCalendarData(grid);
       
       // Process reservations for display
-      const processed = processReservationsForDisplay(reservations || [], grid);
+      const processed = processReservationsForDisplay(reservationsWithFinancials, grid);
       setProcessedReservations(processed);
       
     } catch (err) {
@@ -137,7 +162,8 @@ export const Calendar = () => {
       dateToIndexMap[dateStr] = index;
     });
     
-    return rawReservations.map(reservation => {
+    // Process each reservation with basic info first
+    const processedWithBasicInfo = rawReservations.map(reservation => {
       // Get check-in and check-out dates
       const checkIn = new Date(reservation.arrivalDate || reservation.checkInDate);
       const checkOut = new Date(reservation.departureDate || reservation.checkOutDate);
@@ -175,13 +201,11 @@ export const Calendar = () => {
       // Find calendar grid indexes for this reservation
       const startIndex = dateToIndexMap[checkIn.toISOString().split('T')[0]];
       
-      // End date is exclusive in reservations, so subtract one day
-      const lastDay = new Date(checkOut);
-      lastDay.setDate(lastDay.getDate() - 1);
-      const endIndex = dateToIndexMap[lastDay.toISOString().split('T')[0]];
+      // Use the actual checkout date for visual representation
+      const endIndex = dateToIndexMap[checkOut.toISOString().split('T')[0]];
       
-      // Calculate row based on other reservations
-      const row = 0; // We'll implement row calculations later
+      // Ensure we have the owner payout
+      const ownerPayout = reservation.ownerPayout || reservation.payout || reservation.netAmount || 0;
       
       return {
         ...reservation,
@@ -193,13 +217,69 @@ export const Calendar = () => {
         initial,
         guestCount: reservation.guestsCount || reservation.guests || 1,
         totalPrice: parseFloat(reservation.totalPrice) || 0,
+        ownerPayout: typeof ownerPayout === 'string' ? parseFloat(ownerPayout) : (ownerPayout || 0),
         nights: calculateNights(checkIn, checkOut),
         // Grid placement
         startIndex,
         endIndex,
-        row
+        verticalPosition: 0 // Default position
+      };
+    }).filter(res => res.startIndex !== undefined && res.endIndex !== undefined);
+    
+    // Create a position assigner to track overlapping reservations
+    const positionAssigner = {};
+    
+    // First sort by check-in date and duration (shorter reservations first to optimize vertical space)
+    processedWithBasicInfo.sort((a, b) => {
+      // First by check-in date
+      if (a.startIndex !== b.startIndex) {
+        return a.startIndex - b.startIndex;
+      }
+      // Then by duration (shorter first)
+      return (a.endIndex - a.startIndex) - (b.endIndex - b.startIndex);
+    });
+    
+    // Assign positions
+    const processedWithPositions = processedWithBasicInfo.map(reservation => {
+      // Initialize position trackers for all days of this reservation
+      for (let day = reservation.startIndex; day <= reservation.endIndex; day++) {
+        if (!positionAssigner[day]) {
+          positionAssigner[day] = [];
+        }
+      }
+      
+      // Find the first available position
+      let position = 0;
+      let foundPosition = false;
+      
+      while (!foundPosition) {
+        foundPosition = true;
+        
+        // Check if this position is available for all days of this reservation
+        for (let day = reservation.startIndex; day <= reservation.endIndex; day++) {
+          if (positionAssigner[day].includes(position)) {
+            foundPosition = false;
+            position++;
+            break;
+          }
+        }
+      }
+      
+      // Mark this position as occupied for all days of this reservation
+      for (let day = reservation.startIndex; day <= reservation.endIndex; day++) {
+        positionAssigner[day].push(position);
+      }
+      
+      // Calculate vertical offset (20px per position)
+      const verticalOffset = position * 20;
+      
+      return {
+        ...reservation,
+        verticalPosition: verticalOffset
       };
     });
+    
+    return processedWithPositions;
   };
   
   // Calculate nights between two dates
@@ -249,6 +329,12 @@ export const Calendar = () => {
 
   // Handle reservation hover
   const handleReservationHover = (reservation, event) => {
+    // Clear any existing timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+
     if (reservation) {
       // Calculate position for hover card
       const rect = event.currentTarget.getBoundingClientRect();
@@ -264,8 +350,26 @@ export const Calendar = () => {
       };
       setHoverReservation(hoverData);
     } else {
-      setHoverReservation(null);
+      // Set a delay before hiding the card to allow moving to the card
+      hoverTimeoutRef.current = setTimeout(() => {
+        setHoverReservation(null);
+        hoverTimeoutRef.current = null;
+      }, 150);
     }
+  };
+
+  // Handle hover card mouse events
+  const handleHoverCardMouseEnter = () => {
+    // Clear any hide timeout when entering the card
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+  };
+
+  const handleHoverCardMouseLeave = () => {
+    // Hide the card when the mouse leaves
+    setHoverReservation(null);
   };
 
   // Check if a day has reservations
@@ -409,9 +513,17 @@ export const Calendar = () => {
                   // For multi-row reservations, render separate segments
                   const segments = [];
                   
+                  // Check if the reservation ends on the first day of a row (Sunday)
+                  const endsOnFirstDayOfRow = reservation.endIndex % 7 === 0;
+                  
+                  // Check if reservation ends on the last day of a row (Saturday)
+                  const endsOnLastDayOfRow = reservation.endIndex % 7 === 6;
+                  
                   // First row - from start to end of row
                   const firstRowCellsLeft = 7 - (reservation.startIndex % 7);
                   const firstRowWidth = firstRowCellsLeft * 100 / 7;
+                  
+                  // Add first row segment
                   segments.push({
                     row: rowStart,
                     startCol: reservation.startIndex % 7,
@@ -419,7 +531,7 @@ export const Calendar = () => {
                     type: 'start'
                   });
                   
-                  // Middle rows - full width
+                  // Add middle rows (if any) - full width
                   for (let r = rowStart + 1; r < rowEnd; r++) {
                     segments.push({
                       row: r,
@@ -429,15 +541,36 @@ export const Calendar = () => {
                     });
                   }
                   
-                  // Last row - from start of row to end
-                  const lastRowCells = (reservation.endIndex % 7) + 1;
-                  const lastRowWidth = lastRowCells * 100 / 7;
-                  segments.push({
-                    row: rowEnd,
-                    startCol: 0,
-                    width: lastRowWidth,
-                    type: 'end'
-                  });
+                  // Last row handling depends on where it ends
+                  if (endsOnFirstDayOfRow) {
+                    // Ends on Sunday (first day of row)
+                    segments.push({
+                      row: rowEnd,
+                      startCol: 0,
+                      width: (100 / 7) * 0.45, // End at 45% of Sunday cell width
+                      type: 'end'
+                    });
+                  } else if (endsOnLastDayOfRow) {
+                    // Ends on Saturday (last day of row)
+                    segments.push({
+                      row: rowEnd,
+                      startCol: 0,
+                      width: 100 - (100 / 7) * 0.55, // End at 45% into the last cell
+                      type: 'end'
+                    });
+                  } else {
+                    // Ends on a day in the middle of the row
+                    const lastRowCells = (reservation.endIndex % 7) + 1;
+                    // Adjust width to end at 45% into the last cell
+                    const lastRowWidth = ((lastRowCells - 1) * (100 / 7)) + ((100 / 7) * 0.45);
+                    
+                    segments.push({
+                      row: rowEnd,
+                      startCol: 0,
+                      width: lastRowWidth,
+                      type: 'end'
+                    });
+                  }
                   
                   return segments.map((segment, segIndex) => (
                     <div
@@ -445,10 +578,16 @@ export const Calendar = () => {
                       className={`reservation-bar ${segment.type}`}
                       style={{
                         backgroundColor: reservation.color,
-                        top: `calc(${segment.row} * (100% / 6) + 30px)`, // 6 rows total
-                        left: `calc(${segment.startCol} * (100% / 7))`,
-                        width: `calc(${segment.width}%}px)`,
-                        height: '32px'
+                        top: `calc(${segment.row} * (100% / 6) + (55px / 2) - (36px / 2) + 25px)`,
+                        left: segment.type === 'start' 
+                          ? `calc(${segment.startCol} * (100% / 7) + (100% / 7) * 0.55)` 
+                          : `calc(${segment.startCol} * (100% / 7))`,
+                        width: segment.type === 'middle' 
+                          ? '100%' 
+                          : segment.type === 'start' 
+                            ? `calc(${segment.width}% - (100% / 7) * 0.55)` 
+                            : `calc(${segment.width}%)`,
+                        height: '36px'
                       }}
                       onMouseEnter={(e) => handleReservationHover(reservation, e)}
                       onMouseLeave={() => handleReservationHover(null)}
@@ -459,7 +598,10 @@ export const Calendar = () => {
                             {reservation.initial}
                           </div>
                           <div className="reservation-info">
-                            <div className="guest-name">{reservation.guestName}</div>
+                            <div className="guest-name">
+                              {reservation.guestName}
+                              <span className="owner-payout">{formatCurrency(reservation.ownerPayout || 0)}</span>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -471,13 +613,15 @@ export const Calendar = () => {
                 return (
                   <div
                     key={`${reservation.id}-single-row`}
-                    className={`reservation-bar ${rowStart === rowEnd ? 'single-row' : ''}`}
+                    className="reservation-bar single-row"
                     style={{
                       backgroundColor: reservation.color,
-                      top: `calc(${rowStart} * (100% / 6) + 30px)`, // 6 rows total, vertically centered
-                      left: `calc(${reservation.startIndex % 7} * (100% / 7))`,
-                      width: `calc(${width}%)`,
-                      height: '32px'
+                      top: `calc(${rowStart} * (100% / 6) + (55px / 2) - (36px / 2) + 25px)`,
+                      left: `calc(${reservation.startIndex % 7} * (100% / 7) + (100% / 7) * 0.55)`,
+                      width: reservation.startIndex === reservation.endIndex 
+                        ? `calc((100% / 7) * 0.45)` 
+                        : `calc((${reservation.endIndex - reservation.startIndex}) * (100% / 7) + (100% / 7) * 0.45 - (100% / 7) * 0.55)`,
+                      height: '36px'
                     }}
                     onMouseEnter={(e) => handleReservationHover(reservation, e)}
                     onMouseLeave={() => handleReservationHover(null)}
@@ -487,7 +631,10 @@ export const Calendar = () => {
                         {reservation.initial}
                       </div>
                       <div className="reservation-info">
-                        <div className="guest-name">{reservation.guestName}</div>
+                        <div className="guest-name">
+                          {reservation.guestName}
+                          <span className="owner-payout">{formatCurrency(reservation.ownerPayout || 0)}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -510,9 +657,13 @@ export const Calendar = () => {
         <div 
           className="reservation-details-card"
           style={{
-            top: `${hoverReservation.position.top + 40}px`,
-            left: `${hoverReservation.position.left}px`
+            top: hoverReservation.position.top < window.innerHeight / 2 
+              ? `${hoverReservation.position.top + 30}px` 
+              : `${hoverReservation.position.top - 180}px`,
+            left: `${Math.min(hoverReservation.position.left, window.innerWidth - 300)}px`
           }}
+          onMouseEnter={handleHoverCardMouseEnter}
+          onMouseLeave={handleHoverCardMouseLeave}
         >
           <div className="card-header">
             <div className="guest-profile">

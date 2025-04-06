@@ -269,6 +269,7 @@ const api = {
    */
   getFinancialReport: async (params = {}) => {
     try {
+      console.log("Calling consolidated financial report endpoint with params:", params);
       const response = await fetch(`${API_BASE_URL}/finance/report/consolidated`, {
         method: 'POST',
         headers: {

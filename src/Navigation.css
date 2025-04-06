@@ -24,25 +24,47 @@
 .nav-brand {
   display: flex;
   align-items: center;
+  width: 50px;
+  margin-right: 10px;
 }
 
 .brand-logo {
-  height: 38px;
-  margin-right: 16px;
+  height: 40px;
+  width: auto;
+  object-fit: contain;
 }
 
-.brand-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #9c7c38;
-  margin: 0;
-  letter-spacing: 0.5px;
+.app-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #9c7c38;
+  position: relative;
+  overflow: hidden;
+}
+
+.app-logo::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  height: 70%;
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.brand-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(156, 124, 56, 0.2);
 }
 
 .nav-links {
   display: flex;
-  margin-left: 3rem;
+  margin-left: 10px;
   height: 100%;
 }
 
