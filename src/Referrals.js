@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from './api/api';
 import './Referrals.css';
 
-export const Referrals = () => {
+export const Partnership = () => {
   // State variables
   const [referrals, setReferrals] = useState([]);
   const [totalEarnings, setTotalEarnings] = useState(0);
@@ -106,13 +106,24 @@ export const Referrals = () => {
       const monthlyEstimate = Math.round((baseAmount + bedroomMultiplier + bathroomMultiplier) * randomFactor);
       const yearlyEstimate = monthlyEstimate * 12;
       
+      // Calculate management fee (typically 20-25% of rental income)
+      const managementFee = Math.round(monthlyEstimate * 0.22);
+      const yearlyManagementFee = managementFee * 12;
+      
+      // Calculate partner's 10% of management fee
+      const partnerEarnings = Math.round(managementFee * 0.1);
+      const yearlyPartnerEarnings = partnerEarnings * 12;
+      
       // Simulate API delay
       setTimeout(() => {
         setEstimatedIncome({
           monthly: monthlyEstimate,
           yearly: yearlyEstimate,
-          occupancyRate: Math.round(65 + Math.random() * 20), // Random occupancy between 65-85%
-          potentialReferralEarnings: Math.round(yearlyEstimate * 0.1) // 10% of yearly income
+          managementFee: managementFee,
+          yearlyManagementFee: yearlyManagementFee,
+          monthlyPartnerEarnings: partnerEarnings,
+          yearlyPartnerEarnings: yearlyPartnerEarnings,
+          occupancyRate: Math.round(65 + Math.random() * 20) // Random occupancy between 65-85%
         });
         setEstimateLoading(false);
       }, 1500);
@@ -169,18 +180,12 @@ export const Referrals = () => {
     <div className="referrals-container">
       {/* Dashboard Header */}
       <div className="dashboard-header">
-        <h1 className="page-title">Referral Dashboard</h1>
+        <h1 className="page-title">Partnership Program</h1>
       </div>
       
-      {/* Small Card Dashboard */}
+      {/* Small Card Dashboard - Modernized without icons */}
       <div className="mini-card-dashboard">
         <div className="mini-card total-card">
-          <div className="mini-card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="1" x2="12" y2="23"></line>
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-            </svg>
-          </div>
           <div className="mini-card-content">
             <h3>Total Earnings</h3>
             <div className="mini-amount">{formatCurrency(totalEarnings)}</div>
@@ -188,12 +193,6 @@ export const Referrals = () => {
         </div>
         
         <div className="mini-card pending-card">
-          <div className="mini-card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-          </div>
           <div className="mini-card-content">
             <h3>Pending</h3>
             <div className="mini-amount">{formatCurrency(pendingEarnings)}</div>
@@ -201,27 +200,13 @@ export const Referrals = () => {
         </div>
         
         <div className="mini-card referrals-card">
-          <div className="mini-card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-          </div>
           <div className="mini-card-content">
-            <h3>Active Referrals</h3>
+            <h3>Active Partners</h3>
             <div className="mini-amount">{referrals.filter(r => r.status === 'Active').length}</div>
           </div>
         </div>
         
         <div className="mini-card projection-card">
-          <div className="mini-card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-          </div>
           <div className="mini-card-content">
             <h3>Annual Projection</h3>
             <div className="mini-amount">{formatCurrency(totalEarnings * 3)}</div>
@@ -243,8 +228,8 @@ export const Referrals = () => {
               </svg>
             </div>
             <div className="tab-text">
-              <span className="tab-title">Refer & Earn</span>
-              <span className="tab-subtitle">Earn 10% of monthly income</span>
+              <span className="tab-title">Become a Partner</span>
+              <span className="tab-subtitle">Earn retirement income</span>
             </div>
           </button>
           
@@ -264,7 +249,7 @@ export const Referrals = () => {
             </div>
             <div className="tab-text">
               <span className="tab-title">Income Estimator</span>
-              <span className="tab-subtitle">Calculate potential earnings</span>
+              <span className="tab-subtitle">Calculate partnership earnings</span>
             </div>
           </button>
         </div>
@@ -274,15 +259,15 @@ export const Referrals = () => {
         {activeTab === 'refer' && (
           <div className="main-content">
             <div className="how-it-works">
-              <h2 className="section-title">How Your Referral Commission Works</h2>
+              <h2 className="section-title">How Our Partnership Program Works</h2>
               <div className="commission-explainer">
-                <p>You earn <strong>10% of the monthly rental income</strong> for as long as both you and your referred owner stay with us. The more properties you refer, the more passive income you'll generate!</p>
+                <p>You earn <strong>10% of Luxury Lodging's management fee</strong> for as long as both you and your referred property owner stay with us. The more properties you refer, the more passive retirement income you'll generate!</p>
               </div>
               <div className="steps-container">
                 <div className="step">
                   <div className="step-number">1</div>
                   <h3>Share Your Link</h3>
-                  <p>Share your unique referral link with property owners interested in our management services.</p>
+                  <p>Share your unique partnership link with property owners interested in our management services.</p>
                 </div>
                 <div className="step">
                   <div className="step-number">2</div>
@@ -291,15 +276,15 @@ export const Referrals = () => {
                 </div>
                 <div className="step">
                   <div className="step-number">3</div>
-                  <h3>Earn Ongoing 10%</h3>
-                  <p>You receive 10% of the property's monthly income for as long as they stay with us.</p>
+                  <h3>Earn Ongoing Income</h3>
+                  <p>You receive 10% of our management fee for as long as they stay with us - perfect for retirement income.</p>
                 </div>
               </div>
             </div>
             
             <div className="referral-options">
               <div className="referral-option">
-                <h3>Share Your Referral Link</h3>
+                <h3>Share Your Partnership Link</h3>
                 <div className="referral-link-container">
                   <input 
                     type="text" 
@@ -356,7 +341,7 @@ export const Referrals = () => {
               </div>
               
               <div className="referral-option">
-                <h3>Refer Someone Directly</h3>
+                <h3>Recommend a Property Owner</h3>
                 {referSubmitted ? (
                   <div className="success-message">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -364,7 +349,7 @@ export const Referrals = () => {
                       <polyline points="22 4 12 14.01 9 11.01"></polyline>
                     </svg>
                     <h4>Thank you!</h4>
-                    <p>Your referral has been submitted. We'll reach out to them within 1-2 business days.</p>
+                    <p>Your recommendation has been submitted. We'll reach out to them within 1-2 business days.</p>
                   </div>
                 ) : (
                   <form className="referral-form" onSubmit={submitReferralContact}>
@@ -423,7 +408,7 @@ export const Referrals = () => {
                         <path d="M22 2L11 13"></path>
                         <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
                       </svg>
-                      Submit Referral
+                      Submit Recommendation
                     </button>
                   </form>
                 )}
@@ -432,11 +417,11 @@ export const Referrals = () => {
             
             {referrals.length > 0 && (
               <div className="referrals-activity">
-                <h2 className="section-title">Your Referral Activity</h2>
+                <h2 className="section-title">Your Partnership Activity</h2>
                 {loading ? (
                   <div className="loading">
                     <div className="spinner"></div>
-                    <p>Loading referral data...</p>
+                    <p>Loading partnership data...</p>
                   </div>
                 ) : error ? (
                   <div className="error-message">
@@ -453,11 +438,11 @@ export const Referrals = () => {
                     <table className="referrals-table">
                       <thead>
                         <tr>
-                          <th>Referred Owner</th>
+                          <th>Property Owner</th>
                           <th>Property</th>
                           <th>Date</th>
                           <th>Status</th>
-                          <th>Monthly Income</th>
+                          <th>Management Fee</th>
                           <th>Your Commission</th>
                         </tr>
                       </thead>
@@ -472,7 +457,7 @@ export const Referrals = () => {
                                 {referral.status}
                               </span>
                             </td>
-                            <td>{formatCurrency(referral.propertyIncome)}</td>
+                            <td>{formatCurrency(referral.earnings * 10)}</td>
                             <td>{formatCurrency(referral.earnings)}</td>
                           </tr>
                         ))}
@@ -488,9 +473,9 @@ export const Referrals = () => {
         {activeTab === 'estimate' && (
           <div className="main-content">
             <div className="income-potential">
-              <h2 className="section-title">Estimate Rental Income Potential</h2>
+              <h2 className="section-title">Estimate Your Retirement Income</h2>
               <p className="section-description">
-                See what a property could earn and what your referral commission would be.
+                See what a property could earn and what your partnership commission would be.
               </p>
               
               <div className="estimate-columns">
@@ -597,30 +582,30 @@ export const Referrals = () => {
                       
                       <div className="estimate-cards">
                         <div className="estimate-card">
-                          <div className="estimate-label">Property Monthly</div>
+                          <div className="estimate-label">Property Monthly Rental</div>
                           <div className="estimate-value">{formatCurrency(estimatedIncome.monthly)}</div>
                         </div>
                         
                         <div className="estimate-card">
-                          <div className="estimate-label">Property Annual</div>
-                          <div className="estimate-value">{formatCurrency(estimatedIncome.yearly)}</div>
+                          <div className="estimate-label">Our Management Fee</div>
+                          <div className="estimate-value">{formatCurrency(estimatedIncome.managementFee)}/mo</div>
                         </div>
                         
                         <div className="estimate-card highlight-card">
-                          <div className="estimate-label">Your Annual Commission</div>
-                          <div className="estimate-value">{formatCurrency(estimatedIncome.potentialReferralEarnings)}</div>
+                          <div className="estimate-label">Your Annual Partnership Income</div>
+                          <div className="estimate-value">{formatCurrency(estimatedIncome.yearlyPartnerEarnings)}</div>
                         </div>
                       </div>
                       
                       <div className="referral-opportunity">
-                        <h4>Earn {formatCurrency(Math.round(estimatedIncome.monthly * 0.1))} monthly!</h4>
-                        <p>You'll earn 10% of the monthly rental income for as long as the property stays with us.</p>
+                        <h4>Earn {formatCurrency(estimatedIncome.monthlyPartnerEarnings)} monthly!</h4>
+                        <p>As our partner, you'll earn 10% of our management fee for as long as the property stays with us - perfect for building retirement income.</p>
                         <button className="refer-property-btn" onClick={() => setActiveTab('refer')}>
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M22 2L11 13"></path>
                             <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
                           </svg>
-                          Refer This Property
+                          Recommend This Property
                         </button>
                       </div>
                       
@@ -633,26 +618,26 @@ export const Referrals = () => {
                   ) : (
                     <div className="estimate-placeholder">
                       <div className="estimate-placeholder-text">
-                        <h3>See Your Earning Potential</h3>
-                        <p>Enter property details to calculate both the property's rental income and your 10% commission.</p>
+                        <h3>Build Your Retirement Income</h3>
+                        <p>Enter property details to see how much passive income you could earn through our partnership program.</p>
                         <ul className="benefit-list">
                           <li>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="20 6 9 17 4 12"></polyline>
                             </svg>
-                            Earn 10% of monthly rental income
+                            Earn 10% of Luxury Lodging's management fee
                           </li>
                           <li>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="20 6 9 17 4 12"></polyline>
                             </svg>
-                            Commission continues as long as they stay with us
+                            Income continues as long as they stay with us
                           </li>
                           <li>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="20 6 9 17 4 12"></polyline>
                             </svg>
-                            No limit to how many properties you can refer
+                            Perfect for building retirement income
                           </li>
                         </ul>
                       </div>
@@ -667,11 +652,11 @@ export const Referrals = () => {
               <div className="faq-grid">
                 <div className="faq-item">
                   <h3>How is the 10% commission calculated?</h3>
-                  <p>Your commission is 10% of what the property earns in rental income each month. For example, if a property earns $4,000 monthly, you earn $400 each month.</p>
+                  <p>Your commission is 10% of Luxury Lodging's management fee for each property. For example, if our management fee is $1,000 monthly, you earn $100 each month from that property.</p>
                 </div>
                 <div className="faq-item">
                   <h3>How long do I receive commissions?</h3>
-                  <p>You'll receive the 10% commission for as long as both you and the property owner remain with our service. It's truly passive income!</p>
+                  <p>You'll receive the 10% commission for as long as both you and the property owner remain with our service. This creates a reliable, passive income stream ideal for retirement planning.</p>
                 </div>
               </div>
             </div>
@@ -682,10 +667,10 @@ export const Referrals = () => {
       {/* Call to Action */}
       <div className="cta-section">
         <div className="cta-content">
-          <h2>Start Earning Passive Income Today</h2>
-          <p>Share your referral link, earn 10% commission, and build ongoing passive income with each property you refer.</p>
+          <h2>Build Your Retirement Income Today</h2>
+          <p>Share your partnership link, earn 10% of our management fees, and build ongoing passive income with each property you refer.</p>
           <button className="cta-button" onClick={() => setActiveTab('refer')}>
-            Start Referring
+            Become a Partner
           </button>
         </div>
       </div>
@@ -693,4 +678,4 @@ export const Referrals = () => {
   );
 };
 
-export default Referrals; 
+export default Partnership; 

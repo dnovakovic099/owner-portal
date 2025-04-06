@@ -473,7 +473,7 @@ export const Reservations = () => {
             ...res, 
             ownerPayout: finData.ownerPayout || res.ownerPayout || 0,
             baseRate: finData.baseRate || res.baseRate || 0,
-            cleaningFeeValue: finData.cleaningFeeValue || res.cleaningFee || 0,
+            cleaningFeeValue: finData.TotalCleaningFee || res.cleaningFee || 0,
             weeklyDiscount: finData.weeklyDiscount || finData['weekly Discount'] || 0,
             couponDiscount: finData.couponDiscount || finData['coupon Discount'] || 0,
             monthlyDiscount: finData.monthlyDiscount || finData['monthly Discount'] || 0,
@@ -546,7 +546,7 @@ export const Reservations = () => {
                   ) || (parseFloat(reservation.totalPrice) - parseFloat(reservation.cleaningFee || 0)) / nights;
                   
                   // Get cleaning fee from financial report or reservation
-                  const cleaningFee = parseFloat(finData.cleaningFeeValue) || 
+                  const cleaningFee = parseFloat(finData.TotalCleaningFee) || 
                                      parseFloat(reservation.cleaningFee) || 0;
                   
                   // Tourism tax from financial report
@@ -557,14 +557,14 @@ export const Reservations = () => {
                                   reservation.source || 
                                   reservation.channelName || 'Direct';
                   
-                  // Calculate payment processing fee (3% of first three columns)
-                  // Set to $0 for Airbnb reservations
-                  const paymentProcessingFee = isAirbnb(platform) ? 0 : 
-                                             (baseRate + cleaningFee + tourismTax) * 0.03;
+
+console.log({finData});
+                                  // Get payment processing fee from financial report instead of calculating it
+                  const paymentProcessingFee = parseFloat(finData['PaymentProcessing']) || 0;
                   
                   // Pet fee might be in different fields, try to locate it
                   // In reality, this might be in a custom fee field or part of extraFees
-                  const petFee = 0; // Add logic to extract pet fee when available
+                  const petFee = parseFloat(finData.petFee) || 0;; // Add logic to extract pet fee when available
                   
                   // Get host channel fee only
                   const hostChannelFee = parseFloat(finData.hostChannelFee) || 0;
