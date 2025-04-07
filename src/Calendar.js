@@ -84,16 +84,21 @@ export const Calendar = () => {
       const daysToAdd = 6 - lastDayOfMonth.getDay();
       endDate.setDate(endDate.getDate() + daysToAdd);
       
-      // Format dates as YYYY-MM-DD
+      // Format dates as YYYY-MM-DD for the calendar grid display
       const formattedStartDate = startDate.toISOString().split('T')[0];
       const formattedEndDate = endDate.toISOString().split('T')[0];
       
-      console.log(`Fetching data for property ID: ${selectedProperty} from ${formattedStartDate} to ${formattedEndDate}`);
+      // Create an extended start date that goes back 180 days to fetch older reservations
+      const extendedStartDate = new Date(startDate);
+      extendedStartDate.setDate(extendedStartDate.getDate() - 180); // Go back 180 days
+      const formattedExtendedStartDate = extendedStartDate.toISOString().split('T')[0];
       
-      // Fetch reservations for this date range
+      console.log(`Fetching data for property ID: ${selectedProperty} from ${formattedExtendedStartDate} to ${formattedEndDate}`);
+      
+      // Fetch reservations with extended date range but only include those that overlap with calendar view
       const { reservations } = await api.getReservations({
         listingId: selectedProperty,
-        checkInDateFrom: formattedStartDate,
+        checkInDateFrom: formattedExtendedStartDate, // Use extended start date
         checkOutDateTo: formattedEndDate,
         limit: 100
       });
@@ -103,7 +108,7 @@ export const Calendar = () => {
       try {
         financialReport = await api.getFinancialReport({
           listingMapIds: [selectedProperty],
-          startDate: formattedStartDate,
+          startDate: formattedExtendedStartDate, // Use extended date for financials too
           endDate: formattedEndDate
         });
         
@@ -162,6 +167,10 @@ export const Calendar = () => {
       dateToIndexMap[dateStr] = index;
     });
     
+    // Get the earliest and latest dates in our grid
+    const gridStartDate = grid[0].date;
+    const gridEndDate = grid[grid.length - 1].date;
+    
     // Process each reservation with basic info first
     const processedWithBasicInfo = rawReservations.map(reservation => {
       // Get check-in and check-out dates
@@ -198,14 +207,24 @@ export const Calendar = () => {
       const guestName = reservation.guestName || 'Guest';
       const initial = guestName.charAt(0).toUpperCase();
       
-      // Find calendar grid indexes for this reservation
-      const startIndex = dateToIndexMap[checkIn.toISOString().split('T')[0]];
+      // For reservations that start before our grid, use the grid start as the visual start
+      const visualCheckIn = checkIn < gridStartDate ? gridStartDate : checkIn;
+      // For reservations that end after our grid, use the grid end as the visual end
+      const visualCheckOut = checkOut > gridEndDate ? gridEndDate : checkOut;
       
-      // Use the actual checkout date for visual representation
-      const endIndex = dateToIndexMap[checkOut.toISOString().split('T')[0]];
+      // Find calendar grid indexes for the visual dates
+      const startIndex = dateToIndexMap[visualCheckIn.toISOString().split('T')[0]];
+      const endIndex = dateToIndexMap[visualCheckOut.toISOString().split('T')[0]];
       
       // Ensure we have the owner payout
       const ownerPayout = reservation.ownerPayout || reservation.payout || reservation.netAmount || 0;
+      
+      // Only include reservations that overlap with our current grid
+      const overlapsGrid = checkIn <= gridEndDate && checkOut >= gridStartDate;
+      
+      if (!overlapsGrid) {
+        return null; // Skip reservations that don't overlap with current grid
+      }
       
       return {
         ...reservation,
@@ -224,7 +243,7 @@ export const Calendar = () => {
         endIndex,
         verticalPosition: 0 // Default position
       };
-    }).filter(res => res.startIndex !== undefined && res.endIndex !== undefined);
+    }).filter(res => res !== null && res.startIndex !== undefined && res.endIndex !== undefined);
     
     // Create a position assigner to track overlapping reservations
     const positionAssigner = {};
@@ -410,10 +429,18 @@ export const Calendar = () => {
               {formatCurrency(
                 processedReservations
                   .filter(res => {
-                    // Only include reservations that start in the current month
+                    // Include reservations that overlap with the current month
                     const resMonth = res.checkInDate.getMonth();
                     const resYear = res.checkInDate.getFullYear();
-                    return resMonth === currentMonth.getMonth() && resYear === currentMonth.getFullYear();
+                    const resOutMonth = res.checkOutDate.getMonth();
+                    const resOutYear = res.checkOutDate.getFullYear();
+                    
+                    const currentMonthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+                    const currentMonthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+                    
+                    // Reservation overlaps with current month if:
+                    // Check-in is before or during this month AND Check-out is during or after this month
+                    return (res.checkInDate <= currentMonthEnd && res.checkOutDate >= currentMonthStart);
                   })
                   .reduce((sum, res) => sum + (res.ownerPayout || 0), 0)
               )}
