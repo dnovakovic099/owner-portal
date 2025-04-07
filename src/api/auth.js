@@ -3,8 +3,7 @@
  */
 
 // API base URL - using local proxy server
-const API_BASE_URL = 'http://localhost:3001/api';
-
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 /**
  * Get the stored auth token
  * @returns {string|null} The stored auth token or null if not found
