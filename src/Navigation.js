@@ -45,7 +45,7 @@ export const Navigation = ({ currentPage, navigateTo }) => {
               onClick={() => navigateTo('referrals')}
               className={`nav-link ${currentPage === 'referrals' ? 'active' : ''}`}
             >
-              REFERRALS
+              PARTNERSHIP
             </button>
           </div>
         </div>

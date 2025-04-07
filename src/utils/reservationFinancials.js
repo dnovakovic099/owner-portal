@@ -120,7 +120,8 @@ export const findReservationFinancials = (reservation, financialData, columns) =
       return reservations.map(reservation => ({
         ...reservation,
         ownerPayout: generateOwnerPayout(reservation),
-        listingName: reservation.listingName || ''
+        listingName: reservation.listingName || '',
+        paymentProcessingFee: 0 // Add default payment processing fee
       }));
     }
     
@@ -150,24 +151,38 @@ export const findReservationFinancials = (reservation, financialData, columns) =
         firstRow: rows.length > 0 ? rows[0] : null
       });
       
+      // Check for Payment Processing column
+      const columnNames = columns.map(col => 
+        typeof col === 'object' && col !== null ? col.name : col
+      );
+      console.log('Available columns:', columnNames);
+      
       // Process reservations with financial data
       return reservations.map(reservation => {
         try {
           // Find financial data for this reservation
           const financialData = findReservationFinancials(reservation, rows, columns);
           
-          if (financialData && typeof financialData.ownerPayout === 'number') {
+          if (financialData) {
+            // Look for payment processing fee in financial data
+            let paymentProcessingFee = 0;
+            if (financialData['Payment Processing'] !== undefined) {
+              paymentProcessingFee = parseFloat(financialData['Payment Processing']) || 0;
+            }
+            
             return {
               ...reservation,
               ownerPayout: financialData.ownerPayout,
-              listingName: financialData.listingName || reservation.listingName || ''
+              listingName: financialData.listingName || reservation.listingName || '',
+              paymentProcessingFee // Add payment processing fee
             };
           } else {
             // Use dummy values if no matching financial data found
             return {
               ...reservation,
               ownerPayout: generateOwnerPayout(reservation),
-              listingName: reservation.listingName || ''
+              listingName: reservation.listingName || '',
+              paymentProcessingFee: 0 // Default payment processing fee
             };
           }
         } catch (error) {
@@ -175,7 +190,8 @@ export const findReservationFinancials = (reservation, financialData, columns) =
           return {
             ...reservation,
             ownerPayout: generateOwnerPayout(reservation),
-            listingName: reservation.listingName || ''
+            listingName: reservation.listingName || '',
+            paymentProcessingFee: 0 // Default payment processing fee
           };
         }
       });
@@ -316,13 +332,12 @@ export const findReservationFinancials = (reservation, financialData, columns) =
 
   // Generate dummy financial data for when no real data is available
   const generateDummyFinancials = (reservations) => {
-    return reservations.map(reservation => {
-      return {
-        ...reservation,
-        ownerPayout: generateOwnerPayout(reservation),
-        listingName: reservation.listingName || ''
-      };
-    });
+    return reservations.map(reservation => ({
+      ...reservation,
+      ownerPayout: generateOwnerPayout(reservation),
+      listingName: reservation.listingName || '',
+      paymentProcessingFee: 0 // Add default payment processing fee of 0
+    }));
   };
 
   // Generate a reasonable owner payout amount based on reservation details
