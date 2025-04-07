@@ -5,7 +5,7 @@
 import auth from './auth';
 
 // API base URL - using local proxy server
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 /**
  * Generic API request function
@@ -118,6 +118,8 @@ const api = {
    */
   checkHealth: async () => {
     try {
+      console.log(API_BASE_URL + 'check');
+      
       const response = await fetch(`${API_BASE_URL.split('/api')[0]}/health?_t=${Date.now()}`);
       if (!response.ok) {
         throw new Error(`Server status: ${response.status}`);
