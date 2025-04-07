@@ -70,6 +70,7 @@
 .booking-info-cell {
   padding: 20px !important;
   vertical-align: middle;
+  width: 22%; /* Increase booking info column width */
 }
 
 .booking-info {
@@ -114,6 +115,7 @@
   white-space: nowrap;
   color: var(--gray-800); /* Match other column text colors */
   vertical-align: middle;
+  width: 9.5%;
 }
 
 /* Update cell padding */
@@ -126,6 +128,7 @@
   white-space: nowrap;
   vertical-align: middle;
   height: 3.75rem; /* Ensure consistent height */
+  width: 9.5%;
 }
 
 /* Combined fees cell styling */
@@ -133,6 +136,7 @@
   padding: 0.75rem 0.5rem !important;
   white-space: normal;
   vertical-align: middle;
+  width: 14%; /* Reduce fees column width */
 }
 
 /* Fee breakdown styling */
@@ -195,18 +199,18 @@
 
 /* Adjust column widths for better distribution */
 .booking-info-cell {
-  width: 18%; /* Make booking info column more compact */
+  width: 22%; /* Increase booking info column width */
 }
 
 .rate-cell, 
 .fee-cell, 
 .tax-cell,
 .pet-fee-cell {
-  width: 10%;
+  width: 9.5%;
 }
 
 .combined-fees-cell {
-  width: 15%; /* Reduce fees column width */
+  width: 14%; /* Reduce fees column width */
 }
 
 .owner-payout-cell {

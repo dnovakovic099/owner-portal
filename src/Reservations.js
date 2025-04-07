@@ -13,6 +13,7 @@ export const Reservations = () => {
   const [selectedProperty, setSelectedProperty] = useState(''); // Will be set to first available property
   const [startDate, setStartDate] = useState(today); // Default to today
   const [endDate, setEndDate] = useState(''); // Default to no end date
+  const [selectedChannel, setSelectedChannel] = useState(''); // For channel filtering
   const [properties, setProperties] = useState([]);
   const [propertyNameMap, setPropertyNameMap] = useState({});
   const [allReservations, setAllReservations] = useState([]); // All fetched reservations
@@ -42,7 +43,7 @@ export const Reservations = () => {
   // Apply client-side filtering when filter criteria or all reservations change
   useEffect(() => {
     applyClientSideFilters();
-  }, [allReservations, startDate, endDate]);
+  }, [allReservations, startDate, endDate, selectedChannel]);
   
   // Fetch financial data when filtered reservations change and property is selected
   useEffect(() => {
@@ -180,6 +181,28 @@ export const Reservations = () => {
       });
     }
     
+    // Apply channel filter
+    if (selectedChannel) {
+      filtered = filtered.filter(reservation => {
+        const platform = reservation.source || reservation.channelName || '';
+        const platformLower = platform.toLowerCase();
+        
+        switch(selectedChannel) {
+          case 'airbnb':
+            return platformLower.includes('airbnb');
+          case 'vrbo':
+            return platformLower.includes('vrbo') || platformLower.includes('homeaway');
+          case 'luxury':
+            return !platformLower.includes('airbnb') && 
+                   !platformLower.includes('vrbo') && 
+                   !platformLower.includes('homeaway') &&
+                   !platformLower.includes('booking.com');
+          default:
+            return true;
+        }
+      });
+    }
+    
     // Apply sorting (not just default by date)
     const sortedData = sortReservations(filtered);
     setFilteredReservations(sortedData);
@@ -239,8 +262,11 @@ export const Reservations = () => {
             valueB = parseFloat(b.fees || 0);
             break;
           case 'ownerPayout':
-            valueA = parseFloat(a.ownerPayout || 0);
-            valueB = parseFloat(b.ownerPayout || 0);
+            // Use the financial data for sorting owner payout
+            const finDataA = financialData[a.id] || {};
+            const finDataB = financialData[b.id] || {};
+            valueA = parseFloat(finDataA.ownerPayout || a.ownerPayout || 0);
+            valueB = parseFloat(finDataB.ownerPayout || b.ownerPayout || 0);
             break;
           default:
             valueA = a[sortConfig.key] || 0;
@@ -476,6 +502,14 @@ export const Reservations = () => {
     // Client-side filtering will be applied via useEffect
   };
   
+  // Handle channel filter change
+  const handleChannelChange = (e) => {
+    const channel = e.target.value;
+    setSelectedChannel(channel);
+    
+    // Client-side filtering will be applied via useEffect
+  };
+  
   // Get property name from consistent source
   const getPropertyName = (propertyId, reservation, finData) => {
     // First check financial data
@@ -589,6 +623,21 @@ export const Reservations = () => {
               onChange={handleEndDateChange}
               className="filter-input"
             />
+          </div>
+          
+          <div className="filter-item">
+            <label htmlFor="channel-select">Channel</label>
+            <select
+              id="channel-select"
+              value={selectedChannel}
+              onChange={handleChannelChange}
+              className="filter-input"
+            >
+              <option value="">All Channels</option>
+              <option value="airbnb">Airbnb</option>
+              <option value="vrbo">Vrbo</option>
+              <option value="luxury">Luxury Lodging</option>
+            </select>
           </div>
         </div>
       </div>
