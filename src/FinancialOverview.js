@@ -9,15 +9,11 @@ export const FinancialOverview = () => {
   const [lastMonthFinancials, setLastMonthFinancials] = useState({ columns: [], rows: [], totals: [] });
   const [stats, setStats] = useState([]);
   const [totalStats, setTotalStats] = useState({
-    totalPayout: 5908083.51,
-    totalPartnership: 1181616.70,
-    propertyCount: 70,
-    lastMonthPayout: 23450,
-    topProperties: [
-      { name: "Compound", revenue: 1183095.00 },
-      { name: "Rogers", revenue: 667039.88 },
-      { name: "Spring St/Danielle Dr", revenue: 421828.67 }
-    ]
+    totalPayout: 0,
+    totalPartnership: 0,
+    propertyCount: 0,
+    lastMonthPayout: 0,
+    topProperties: []
   });
   const [loading, setLoading] = useState(true);
   const [loadingFinancials, setLoadingFinancials] = useState(false);
@@ -90,8 +86,7 @@ export const FinancialOverview = () => {
       // If we have properties but no financial rows, clear stats
       setStats([]);
       // Update total stats with zeros or defaults
-      setTotalStats(prev => ({
-        ...prev,
+      setTotalStats(() => ({
         totalPayout: 0,
         totalPartnership: 0,
         lastMonthPayout: 0,
@@ -326,6 +321,7 @@ export const FinancialOverview = () => {
     });
     
     setStats(propertyStats);
+    console.log(propertyStats);
     
     // Calculate total payout and estimated partnership income (20% of total payout)
     if (propertyStats.length > 0) {
