@@ -44,6 +44,18 @@ export const FinancialOverview = () => {
     if (properties.length > 0) {
       fetchListingFinancials();
       fetchLastMonthFinancials();
+    } else {
+      // If no properties, reset financial data and set loading to false
+      setListingFinancials({ columns: [], rows: [], totals: [] });
+      setLastMonthFinancials({ columns: [], rows: [], totals: [] });
+      setTotalStats({
+        totalPayout: 0,
+        totalPartnership: 0,
+        propertyCount: 0,
+        lastMonthPayout: 0,
+        topProperties: []
+      });
+      setLoadingFinancials(false);
     }
   }, [properties]);
   
@@ -142,7 +154,11 @@ export const FinancialOverview = () => {
   
   // Fetch listing financials data directly
   const fetchListingFinancials = async () => {
-    if (properties.length === 0) return;
+    // Skip if no properties
+    if (properties.length === 0) {
+      setLoadingFinancials(false);
+      return;
+    }
     
     setLoadingFinancials(true);
     
@@ -191,7 +207,10 @@ export const FinancialOverview = () => {
   
   // Fetch last month financials data
   const fetchLastMonthFinancials = async () => {
-    if (properties.length === 0) return;
+    // Skip if no properties
+    if (properties.length === 0) {
+      return;
+    }
     
     try {
       // Get last month date range parameters
