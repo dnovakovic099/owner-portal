@@ -28,6 +28,44 @@ export const Partnership = () => {
   const [referMessage, setReferMessage] = useState('');
   const [referSubmitted, setReferSubmitted] = useState(false);
 
+  // Financial data state
+  const [financialData, setFinancialData] = useState({
+    lastMonth: {
+      totalEarned: 1700,
+      ownerPayout: 15300,
+      partnershipEarned: 1700,
+      totalProperties: 4,
+      monthOverMonthGrowth: 12.5
+    },
+    currentMonth: {
+      totalEarned: 0,
+      ownerPayout: 0,
+      partnershipEarned: 0,
+      propertiesAdded: 0
+    },
+    yearToDate: {
+      totalEarned: 4250,
+      ownerPayout: 38250,
+      partnershipEarned: 4250
+    },
+    forecast: {
+      nextMonth: 1850,
+      nextQuarter: 5800,
+      endOfYear: 12400
+    },
+    propertyPerformance: [
+      { id: 1, name: 'Beach Avenue', location: 'Miami', occupancy: 92, revenue: 4500, change: 8.5 },
+      { id: 2, name: 'Palm Street', location: 'Orlando', occupancy: 85, revenue: 3500, change: -2.3 },
+      { id: 3, name: 'Ocean Blvd', location: 'Tampa', occupancy: 88, revenue: 3800, change: 5.2 },
+      { id: 4, name: 'Bay View', location: 'Key West', occupancy: 95, revenue: 5200, change: 12.8 }
+    ],
+    marketComparison: {
+      avgOccupancy: { yours: 90, market: 82 },
+      avgRevenue: { yours: 4250, market: 3800 },
+      growthRate: { yours: 12.5, market: 8.3 }
+    }
+  });
+
   // Fetch referrals on component mount
   useEffect(() => {
     fetchReferrals();
@@ -182,6 +220,253 @@ export const Partnership = () => {
       return (
         <>
           <h2 className="section-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Financial Overview
+          </h2>
+          
+          <div className="financial-overview">
+            <h3 className="financial-overview-title">Monthly Summary</h3>
+            
+            <div className="financial-metrics">
+              <div className="metric-card">
+                <div className="metric-info">
+                  <span className="metric-label">Last Month Earnings</span>
+                  <span className="metric-value">{formatMoney(financialData.lastMonth.totalEarned)}</span>
+                  <span className="metric-comparison">
+                    {financialData.lastMonth.monthOverMonthGrowth > 0 ? (
+                      <span className="metric-comparison-up">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        {financialData.lastMonth.monthOverMonthGrowth}%
+                      </span>
+                    ) : (
+                      <span className="metric-comparison-down">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                        {Math.abs(financialData.lastMonth.monthOverMonthGrowth)}%
+                      </span>
+                    )} vs previous month
+                  </span>
+                </div>
+                <div className="metric-icon-container">
+                  <svg className="metric-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-info">
+                  <span className="metric-label">Year-to-Date Earnings</span>
+                  <span className="metric-value">{formatMoney(financialData.yearToDate.totalEarned)}</span>
+                  <span className="metric-comparison">From {referrals.length} partner properties</span>
+                </div>
+                <div className="metric-icon-container">
+                  <svg className="metric-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="20" x2="12" y2="10"></line>
+                    <line x1="18" y1="20" x2="18" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="16"></line>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            
+            <h3 className="financial-overview-title">Earnings Forecast</h3>
+            <div className="forecast-container">
+              <div className="forecast-card">
+                <div className="forecast-period">Next Month</div>
+                <div className="forecast-amount">{formatMoney(financialData.forecast.nextMonth)}</div>
+                <div className="forecast-change">
+                  <span className="metric-comparison-up">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                    8.8%
+                  </span>
+                  projected growth
+                </div>
+              </div>
+              <div className="forecast-card">
+                <div className="forecast-period">Next Quarter</div>
+                <div className="forecast-amount">{formatMoney(financialData.forecast.nextQuarter)}</div>
+                <div className="forecast-change">Based on current trajectory</div>
+              </div>
+              <div className="forecast-card">
+                <div className="forecast-period">End of Year</div>
+                <div className="forecast-amount">{formatMoney(financialData.forecast.endOfYear)}</div>
+                <div className="forecast-change">Projected total</div>
+              </div>
+            </div>
+            
+            <div className="visualization-container">
+              <h3 className="financial-overview-title">6-Month Earnings Trend</h3>
+              <div className="mini-chart">
+                <div className="mini-chart-bar" style={{height: '30%'}}></div>
+                <div className="mini-chart-bar" style={{height: '45%'}}></div>
+                <div className="mini-chart-bar" style={{height: '40%'}}></div>
+                <div className="mini-chart-bar" style={{height: '60%'}}></div>
+                <div className="mini-chart-bar" style={{height: '75%'}}></div>
+                <div className="mini-chart-bar" style={{height: '90%'}}></div>
+              </div>
+              <div className="mini-chart-labels">
+                <span>Nov</span>
+                <span>Dec</span>
+                <span>Jan</span>
+                <span>Feb</span>
+                <span>Mar</span>
+                <span>Apr</span>
+              </div>
+            </div>
+            
+            <h3 className="financial-overview-title">Property Performance</h3>
+            <div className="property-performance-table-container">
+              <table className="property-performance-table">
+                <thead>
+                  <tr>
+                    <th>Property</th>
+                    <th>Location</th>
+                    <th>Occupancy</th>
+                    <th>Monthly Revenue</th>
+                    <th>Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {financialData.propertyPerformance.map(property => (
+                    <tr key={property.id}>
+                      <td>{property.name}</td>
+                      <td>{property.location}</td>
+                      <td>
+                        <div className="occupancy-bar-container">
+                          <div className="occupancy-bar" style={{width: `${property.occupancy}%`}}></div>
+                          <span>{property.occupancy}%</span>
+                        </div>
+                      </td>
+                      <td>{formatMoney(property.revenue)}</td>
+                      <td>
+                        {property.change > 0 ? (
+                          <span className="metric-comparison-up">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="18 15 12 9 6 15"></polyline>
+                            </svg>
+                            {property.change}%
+                          </span>
+                        ) : (
+                          <span className="metric-comparison-down">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                            {Math.abs(property.change)}%
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            <h3 className="financial-overview-title">Market Comparison</h3>
+            <div className="market-comparison-container">
+              <div className="comparison-card">
+                <div className="comparison-title">Average Occupancy</div>
+                <div className="comparison-metrics">
+                  <div className="comparison-metric">
+                    <div className="comparison-label">Your Properties</div>
+                    <div className="comparison-value">{financialData.marketComparison.avgOccupancy.yours}%</div>
+                    <div className="comparison-bar-container">
+                      <div className="comparison-bar yours" style={{width: `${financialData.marketComparison.avgOccupancy.yours}%`}}></div>
+                    </div>
+                  </div>
+                  <div className="comparison-metric">
+                    <div className="comparison-label">Market Average</div>
+                    <div className="comparison-value">{financialData.marketComparison.avgOccupancy.market}%</div>
+                    <div className="comparison-bar-container">
+                      <div className="comparison-bar market" style={{width: `${financialData.marketComparison.avgOccupancy.market}%`}}></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="comparison-difference">
+                  <span className="metric-comparison-up">
+                    +{financialData.marketComparison.avgOccupancy.yours - financialData.marketComparison.avgOccupancy.market}% above market
+                  </span>
+                </div>
+              </div>
+              
+              <div className="comparison-card">
+                <div className="comparison-title">Average Monthly Revenue</div>
+                <div className="comparison-metrics">
+                  <div className="comparison-metric">
+                    <div className="comparison-label">Your Properties</div>
+                    <div className="comparison-value">{formatMoney(financialData.marketComparison.avgRevenue.yours)}</div>
+                    <div className="comparison-bar-container">
+                      <div className="comparison-bar yours" style={{width: `${(financialData.marketComparison.avgRevenue.yours / 5000) * 100}%`}}></div>
+                    </div>
+                  </div>
+                  <div className="comparison-metric">
+                    <div className="comparison-label">Market Average</div>
+                    <div className="comparison-value">{formatMoney(financialData.marketComparison.avgRevenue.market)}</div>
+                    <div className="comparison-bar-container">
+                      <div className="comparison-bar market" style={{width: `${(financialData.marketComparison.avgRevenue.market / 5000) * 100}%`}}></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="comparison-difference">
+                  <span className="metric-comparison-up">
+                    +{Math.round((financialData.marketComparison.avgRevenue.yours / financialData.marketComparison.avgRevenue.market - 1) * 100)}% above market
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="payout-section">
+              <div className="payout-header">
+                <h3 className="payout-title">Last Month Payout Summary</h3>
+                <span className="payout-period">April 2024</span>
+              </div>
+              
+              <div className="payout-row">
+                <div className="payout-label">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 3h16a2 2 0 0 1 2 2v6a10 10 0 0 1-10 10A10 10 0 0 1 2 11V5a2 2 0 0 1 2-2z"></path>
+                    <path d="M8 10a3 3 0 0 1 4 0 3 3 0 0 0 4 0"></path>
+                  </svg>
+                  Owner Payouts Generated
+                </div>
+                <div className="payout-value">{formatMoney(financialData.lastMonth.ownerPayout)}</div>
+              </div>
+              
+              <div className="payout-row">
+                <div className="payout-label">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                    <polyline points="17 6 23 6 23 12"></polyline>
+                  </svg>
+                  Properties Active
+                </div>
+                <div className="payout-value">{financialData.lastMonth.totalProperties}</div>
+              </div>
+              
+              <div className="partnership-earnings">
+                <div className="partnership-row">
+                  <div className="partnership-label">Your Partnership Commission</div>
+                  <div className="partnership-value highlight">{formatMoney(financialData.lastMonth.partnershipEarned)}</div>
+                </div>
+                <div className="partnership-row">
+                  <div className="partnership-label">Commission Rate</div>
+                  <div className="partnership-value">10%</div>
+                </div>
+                <div className="partnership-row">
+                  <div className="partnership-label">Total Partnership Earned</div>
+                  <div className="partnership-value highlight">{formatMoney(financialData.yearToDate.partnershipEarned)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <h2 className="section-title" style={{marginTop: 'var(--space-xxl)'}}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             Program Blueprint
           </h2>
@@ -442,26 +727,80 @@ export const Partnership = () => {
       
       <div className="stats-grid">
         <div className="stat-card glass-card">
+          <div className="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
           <div className="stat-label">Total Earned</div>
-          <div className="stat-value">{formatMoney(totalEarnings)}</div>
+          <div className="stat-value">
+            {formatMoney(totalEarnings)}
+            <span className="stat-trend stat-trend-up">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              8%
+            </span>
+          </div>
           <div className="stat-subtext">Lifetime Payouts</div>
         </div>
         
         <div className="stat-card glass-card">
+          <div className="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
           <div className="stat-label">Pending Commission</div>
-          <div className="stat-value">{formatMoney(pendingEarnings)}</div>
+          <div className="stat-value">
+            {formatMoney(pendingEarnings)}
+            <span className="stat-trend stat-trend-up">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              12%
+            </span>
+          </div>
           <div className="stat-subtext">Awaiting Confirmation</div>
         </div>
         
         <div className="stat-card glass-card">
+          <div className="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div>
           <div className="stat-label">Active Referrals</div>
-          <div className="stat-value">{referrals.filter(r => r.status === 'Active').length}</div>
+          <div className="stat-value">
+            {referrals.filter(r => r.status === 'Active').length}
+            <span className="stat-trend stat-trend-up">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              25%
+            </span>
+          </div>
           <div className="stat-subtext">Currently Generating</div>
         </div>
         
         <div className="stat-card glass-card">
+          <div className="stat-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+          </div>
           <div className="stat-label">Est. Annual Income</div>
-          <div className="stat-value">{formatMoney(totalEarnings * 12)}</div>
+          <div className="stat-value">
+            {formatMoney(totalEarnings * 12)}
+            <span className="stat-trend stat-trend-up">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              15%
+            </span>
+          </div>
           <div className="stat-subtext">Yearly Projection</div>
         </div>
       </div>

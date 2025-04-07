@@ -92,7 +92,7 @@
   font-weight: 400;
 }
 
-/* --- Stats Grid --- */
+/* --- Stats Grid with Enhanced Visual Elements --- */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -103,6 +103,29 @@
 .stat-card {
   padding: var(--space-lg);
   text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: var(--gradient-gold);
+  opacity: 0;
+  transition: opacity var(--transition-fast), left var(--transition-fast), right var(--transition-fast);
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+  left: 0;
+  right: 0;
 }
 
 .stat-label {
@@ -120,11 +143,471 @@
   color: var(--color-text-accent);
   margin-bottom: var(--space-xs);
   line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.stat-trend {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-left: var(--space-xs);
+}
+
+.stat-trend-up {
+  color: var(--color-success);
+}
+
+.stat-trend-down {
+  color: var(--color-error);
+}
+
+.stat-trend svg {
+  width: 14px;
+  height: 14px;
+  margin-right: 2px;
 }
 
 .stat-subtext {
   font-size: 0.8125rem;
   color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
+}
+
+.stat-icon {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-accent);
+  opacity: 0.4;
+}
+
+/* --- Financial Overview Section with Enhanced Elements --- */
+
+/* Earnings Forecast */
+.forecast-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.forecast-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-lg);
+  text-align: center;
+  position: relative;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.forecast-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.forecast-period {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+  font-weight: 600;
+}
+
+.forecast-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-accent);
+  margin-bottom: var(--space-sm);
+}
+
+.forecast-change {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+/* Property Performance Table */
+.property-performance-table-container {
+  margin-bottom: var(--space-xl);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.property-performance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.property-performance-table th,
+.property-performance-table td {
+  padding: var(--space-md);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.property-performance-table th {
+  background: var(--color-surface-alt);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.property-performance-table td {
+  color: var(--color-text-primary);
+}
+
+.property-performance-table tbody tr {
+  transition: background-color var(--transition-fast);
+}
+
+.property-performance-table tbody tr:hover {
+  background-color: var(--color-surface-alt);
+}
+
+.property-performance-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Occupancy Bar */
+.occupancy-bar-container {
+  position: relative;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.occupancy-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(212, 175, 55, 0.5);
+  border-radius: 10px;
+}
+
+.occupancy-bar-container span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--color-text-primary);
+}
+
+/* Market Comparison */
+.market-comparison-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.comparison-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-lg);
+}
+
+.comparison-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-md);
+  text-align: center;
+}
+
+.comparison-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.comparison-metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.comparison-label {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.comparison-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.comparison-bar-container {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.comparison-bar {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.comparison-bar.yours {
+  background: var(--color-text-accent);
+}
+
+.comparison-bar.market {
+  background: var(--color-text-secondary);
+  opacity: 0.5;
+}
+
+.comparison-difference {
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: var(--space-sm);
+}
+
+/* --- Financial Overview Section --- */
+.financial-overview {
+  margin-bottom: var(--space-xl);
+}
+
+.financial-overview-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.financial-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.metric-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.metric-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.metric-comparison {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metric-comparison-up {
+  color: var(--color-success);
+}
+
+.metric-comparison-down {
+  color: var(--color-error);
+}
+
+.metric-icon-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-accent);
+}
+
+/* --- Owner Payout Section with Partnership Earnings --- */
+.payout-section {
+  margin-bottom: var(--space-xl);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-lg);
+}
+
+.payout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.payout-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.payout-period {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface-alt);
+  border-radius: var(--border-radius-sm);
+}
+
+.payout-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.payout-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.payout-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.payout-label svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-accent);
+}
+
+.payout-value {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.payout-value.highlight {
+  color: var(--color-text-accent);
+}
+
+.payout-details {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin-left: var(--space-md);
+  margin-top: var(--space-xs);
+}
+
+.partnership-earnings {
+  background: rgba(212, 175, 55, 0.05);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.partnership-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
+.partnership-row:last-child {
+  margin-bottom: 0;
+  padding-top: var(--space-sm);
+  border-top: 1px dashed var(--color-border);
+  font-weight: 600;
+}
+
+.partnership-label {
+  color: var(--color-text-secondary);
+}
+
+.partnership-value {
+  color: var(--color-text-primary);
+}
+
+.partnership-value.highlight {
+  color: var(--color-text-accent);
+}
+
+/* --- Data Visualization Styles --- */
+.visualization-container {
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+
+.mini-chart {
+  height: 40px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  margin-top: var(--space-md);
+}
+
+.mini-chart-bar {
+  flex: 1;
+  background: rgba(212, 175, 55, 0.2);
+  border-radius: 3px 3px 0 0;
+  height: 100%;
+  max-height: 100%;
+  min-height: 4px;
+  transition: height var(--transition-fast);
+}
+
+.mini-chart-bar:hover {
+  background: rgba(212, 175, 55, 0.4);
+}
+
+.mini-chart-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
 }
 
 /* --- Layout Wrapper --- */
@@ -681,6 +1164,15 @@ select.form-control {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  .financial-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .forecast-container,
+  .market-comparison-container {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -727,6 +1219,20 @@ select.form-control {
   
   .form-row {
     grid-template-columns: 1fr;
+  }
+  
+  .payout-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+  
+  .property-performance-table-container {
+    overflow-x: auto;
+  }
+  
+  .property-performance-table {
+    min-width: 650px;
   }
 }
 

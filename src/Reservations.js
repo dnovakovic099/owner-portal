@@ -21,6 +21,11 @@ export const Reservations = () => {
   const [loading, setLoading] = useState(true);
   const [loadingFinancials, setLoadingFinancials] = useState(false);
   const [error, setError] = useState(null);
+  // Add sorting state
+  const [sortConfig, setSortConfig] = useState({
+    key: 'arrivalDate',
+    direction: 'asc' // Default sorting by arrival date, soonest first
+  });
   
   // Fetch properties on component mount
   useEffect(() => {
@@ -149,7 +154,11 @@ export const Reservations = () => {
   
   // Apply client-side filtering
   const applyClientSideFilters = () => {
-    if (!allReservations.length) return;
+    // If there are no reservations, ensure filtered reservations is empty
+    if (!allReservations.length) {
+      setFilteredReservations([]);
+      return;
+    }
     
     // Start with all reservations
     let filtered = [...allReservations];
@@ -171,15 +180,111 @@ export const Reservations = () => {
       });
     }
     
-    // Sort by arrival date (ascending)
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.arrivalDate || a.checkInDate);
-      const dateB = new Date(b.arrivalDate || b.checkInDate);
-      return dateA - dateB;
-    });
-    
-    setFilteredReservations(filtered);
+    // Apply sorting (not just default by date)
+    const sortedData = sortReservations(filtered);
+    setFilteredReservations(sortedData);
   };
+  
+  // Sort function
+  const sortReservations = (reservations) => {
+    const sortableItems = [...reservations];
+    
+    if (sortConfig !== null) {
+      sortableItems.sort((a, b) => {
+        let valueA, valueB;
+        
+        // Determine sort values based on column key
+        switch(sortConfig.key) {
+          case 'guestName':
+            // When sorting by booking information column, use arrival date first
+            const dateA = new Date(a.arrivalDate || a.checkInDate || 0);
+            const dateB = new Date(b.arrivalDate || b.checkInDate || 0);
+            
+            // If dates are the same, then use guest name as secondary sort
+            if (dateA.getTime() === dateB.getTime()) {
+              valueA = a.guestName || '';
+              valueB = b.guestName || '';
+            } else {
+              // Otherwise primarily sort by date
+              valueA = dateA;
+              valueB = dateB;
+            }
+            break;
+          case 'arrivalDate':
+            valueA = new Date(a.arrivalDate || a.checkInDate || 0);
+            valueB = new Date(b.arrivalDate || b.checkInDate || 0);
+            break;
+          case 'nights':
+            valueA = calculateNights(a.arrivalDate || a.checkInDate, a.departureDate || a.checkOutDate);
+            valueB = calculateNights(b.arrivalDate || b.checkInDate, b.departureDate || b.checkOutDate);
+            break;
+          case 'baseRate':
+            valueA = parseFloat(a.baseRate || 0);
+            valueB = parseFloat(b.baseRate || 0);
+            break;
+          case 'cleaningFee':
+            valueA = parseFloat(a.cleaningFee || a.cleaningFeeValue || 0);
+            valueB = parseFloat(b.cleaningFee || b.cleaningFeeValue || 0);
+            break;
+          case 'tourismTax':
+            valueA = parseFloat(a.totalTax || a.tourismTax || 0);
+            valueB = parseFloat(b.totalTax || b.tourismTax || 0);
+            break;
+          case 'petFee':
+            valueA = parseFloat(a.petFee || 0);
+            valueB = parseFloat(b.petFee || 0);
+            break;
+          case 'fees':
+            valueA = parseFloat(a.fees || 0);
+            valueB = parseFloat(b.fees || 0);
+            break;
+          case 'ownerPayout':
+            valueA = parseFloat(a.ownerPayout || 0);
+            valueB = parseFloat(b.ownerPayout || 0);
+            break;
+          default:
+            valueA = a[sortConfig.key] || 0;
+            valueB = b[sortConfig.key] || 0;
+        }
+        
+        // Handle string comparison
+        if (typeof valueA === 'string' && typeof valueB === 'string') {
+          return sortConfig.direction === 'asc' 
+            ? valueA.localeCompare(valueB)
+            : valueB.localeCompare(valueA);
+        }
+        
+        // Handle numeric/date comparison
+        return sortConfig.direction === 'asc' 
+          ? (valueA < valueB ? -1 : valueA > valueB ? 1 : 0)
+          : (valueA > valueB ? -1 : valueA < valueB ? 1 : 0);
+      });
+    }
+    
+    return sortableItems;
+  };
+
+  // Request sort function
+  const requestSort = (key) => {
+    let direction = 'desc';
+    if (sortConfig.key === key && sortConfig.direction === 'desc') {
+      direction = 'asc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Get sort direction class
+  const getSortDirectionClass = (key) => {
+    if (sortConfig.key !== key) return 'sortable';
+    return sortConfig.direction === 'asc' ? 'sort-asc' : 'sort-desc';
+  };
+
+  // Run applyClientSideFilters when sort config changes
+  useEffect(() => {
+    if (allReservations.length > 0) {
+      applyClientSideFilters();
+    }
+  }, [sortConfig]);
   
   // Function to fetch financial data optimized for a single property and date range
   const fetchFinancialData = async () => {
@@ -329,21 +434,45 @@ export const Reservations = () => {
   
   // Handle property change
   const handlePropertyChange = (e) => {
-    setSelectedProperty(e.target.value);
-    // Clear financial data when changing property
-    setFinancialData({});
+    const newPropertyId = e.target.value;
+    
+    // Reset state when property changes
+    setSelectedProperty(newPropertyId);
+    setAllReservations([]); // Clear all reservations
+    setFilteredReservations([]); // Clear filtered reservations
+    setFinancialData({}); // Clear financial data
+    
     // Property changes require re-fetching from API
+    // The useEffect will trigger fetchAllReservations
   };
   
   // Handle start date change
   const handleStartDateChange = (e) => {
-    setStartDate(e.target.value);
+    const newStartDate = e.target.value;
+    setStartDate(newStartDate);
+    
+    // Reset filtered reservations to ensure we don't show old data
+    // if no reservations match the new filter
+    setFilteredReservations([]);
+    
+    // Clear financial data as it's no longer relevant
+    setFinancialData({});
+    
     // Client-side filtering will be applied via useEffect
   };
   
   // Handle end date change
   const handleEndDateChange = (e) => {
-    setEndDate(e.target.value);
+    const newEndDate = e.target.value;
+    setEndDate(newEndDate);
+    
+    // Reset filtered reservations to ensure we don't show old data
+    // if no reservations match the new filter
+    setFilteredReservations([]);
+    
+    // Clear financial data as it's no longer relevant
+    setFinancialData({});
+    
     // Client-side filtering will be applied via useEffect
   };
   
@@ -507,13 +636,34 @@ export const Reservations = () => {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Booking Information</th>
-                <th>Base Rate</th>
-                <th>Cleaning Fee</th>
-                <th>Tourism Tax</th>
-                <th>Pet Fee</th>
-                <th>Fees</th>
-                <th>Total Payout</th>
+                <th onClick={() => requestSort('guestName')} className={getSortDirectionClass('guestName')}>
+                  Booking Information
+                  <span className="sort-icon"></span>
+                </th>
+                <th onClick={() => requestSort('baseRate')} className={getSortDirectionClass('baseRate')}>
+                  Base Rate
+                  <span className="sort-icon"></span>
+                </th>
+                <th onClick={() => requestSort('cleaningFee')} className={getSortDirectionClass('cleaningFee')}>
+                  Cleaning Fee
+                  <span className="sort-icon"></span>
+                </th>
+                <th onClick={() => requestSort('tourismTax')} className={getSortDirectionClass('tourismTax')}>
+                  Tourism Tax
+                  <span className="sort-icon"></span>
+                </th>
+                <th onClick={() => requestSort('petFee')} className={getSortDirectionClass('petFee')}>
+                  Pet Fee
+                  <span className="sort-icon"></span>
+                </th>
+                <th onClick={() => requestSort('fees')} className={getSortDirectionClass('fees')}>
+                  Fees
+                  <span className="sort-icon"></span>
+                </th>
+                <th onClick={() => requestSort('ownerPayout')} className={getSortDirectionClass('ownerPayout')}>
+                  Total Payout
+                  <span className="sort-icon"></span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -648,9 +798,9 @@ export const Reservations = () => {
                         </div>
                       </td>
                       <td className="owner-payout-cell">
-                        <div className={`payout-value ${hasFinancialData ? 'from-report' : ''} ${getValueClass(ownerPayout)}`}>
+                        <span className={`${hasFinancialData ? 'from-report' : ''} ${getValueClass(ownerPayout)}`}>
                           {formatCurrency(ownerPayout)}
-                        </div>
+                        </span>
                       </td>
                     </tr>
                   );

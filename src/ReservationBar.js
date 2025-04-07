@@ -28,7 +28,8 @@ const ReservationBar = ({ reservation, gridStartDate }) => {
     if (source.includes('airbnb')) return '#ff385c';
     if (source.includes('vrbo') || source.includes('homeaway')) return '#3662d8';
     if (source.includes('booking')) return '#003580';
-    return '#008489'; // Default teal for direct bookings
+    // Use the same gold color for both direct and luxury bookings
+    return '#b39149'; // Gold color for Luxury Lodging (direct and luxurylodging)
   };
   
   // Get first letter of guest name

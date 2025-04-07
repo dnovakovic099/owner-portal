@@ -30,7 +30,11 @@ const ApiError = ({ error, retry }) => (
 
 // Main App content
 const AppContent = () => {
-  const [currentPage, setCurrentPage] = useState('financial');
+  // Use localStorage for currentPage state to persist across refreshes
+  const [currentPage, setCurrentPage] = useState(() => {
+    // Try to get the saved page from localStorage, default to 'financial'
+    return localStorage.getItem('currentPage') || 'financial';
+  });
   const [apiReady, setApiReady] = useState(false);
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState(null);
@@ -39,6 +43,11 @@ const AppContent = () => {
   useEffect(() => {
     checkApiHealth();
   }, []);
+  
+  // Save currentPage to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('currentPage', currentPage);
+  }, [currentPage]);
   
   // Function to check API health
   const checkApiHealth = async () => {

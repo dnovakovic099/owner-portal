@@ -185,8 +185,8 @@ export const Calendar = () => {
         color = '#3662d8'; // VRBO blue
       } else if (source.includes('booking.com')) {
         color = '#003580'; // Booking.com blue
-      } else if (source.includes('direct')) {
-        color = '#008489'; // Teal for direct bookings
+      } else if (source.includes('direct') || source.includes('luxury') || source.includes('luxurylodging')) {
+        color = '#b39149'; // Gold for Luxury Lodging (direct bookings and luxurylodging)
       }
       
       // If it's a past reservation, use gray
@@ -383,11 +383,6 @@ export const Calendar = () => {
     <div className="calendar-container">
       <div className="page-header">
         <h1 className="page-title">Calendar</h1>
-        
-        <div className="view-tabs">
-          <button className="view-tab active">Calendar</button>
-          {/* <button className="view-tab">Booking Report</button> */}
-        </div>
       </div>
 
       {/* Property selector */}
@@ -401,12 +396,30 @@ export const Calendar = () => {
             <option value="" disabled>Select a property</option>
             {properties.map(property => (
               <option key={property.id} value={property.id}>
-                {property.name || `Property #${property.id}`}
+                {property.internalListingName || property.name || `Property #${property.id}`}
               </option>
             ))}
           </select>
           <span className="select-arrow">▼</span>
         </div>
+        
+        {/* Total Owner Payout Summary - moved to be on same line as dropdown */}
+        {!loading && selectedProperty && processedReservations.length > 0 && (
+          <div className="inline-payout-summary">
+            <span className="payout-amount">
+              {formatCurrency(
+                processedReservations
+                  .filter(res => {
+                    // Only include reservations that start in the current month
+                    const resMonth = res.checkInDate.getMonth();
+                    const resYear = res.checkInDate.getFullYear();
+                    return resMonth === currentMonth.getMonth() && resYear === currentMonth.getFullYear();
+                  })
+                  .reduce((sum, res) => sum + (res.ownerPayout || 0), 0)
+              )}
+            </span>
+          </div>
+        )}
       </div>
 
       {loading && (
@@ -673,7 +686,14 @@ export const Calendar = () => {
               <div className="guest-name-container">
                 <h4>{hoverReservation.guestName}</h4>
                 <span className="booking-source">
-                  {hoverReservation.source || hoverReservation.channelName || 'Direct Booking'}
+                  {(() => {
+                    const source = (hoverReservation.source || hoverReservation.channelName || '').toLowerCase();
+                    if (source.includes('airbnb')) return 'Airbnb';
+                    if (source.includes('vrbo') || source.includes('homeaway')) return 'Vrbo';
+                    if (source.includes('booking.com')) return 'Booking.com';
+                    // Both direct and luxury should show as Luxury Lodging
+                    return 'Luxury Lodging';
+                  })()}
                 </span>
               </div>
             </div>

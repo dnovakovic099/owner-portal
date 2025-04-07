@@ -98,68 +98,72 @@
 .nav-right {
   display: flex;
   align-items: center;
-}
-
-.profile-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 1.4rem;
-  border: 1px solid #9c7c38;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #9c7c38;
-  background-color: transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.profile-button:hover {
-  background-color: #9c7c38;
-  color: #fff;
-}
-
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  gap: 16px;
 }
 
 .user-info {
-  display: flex;
-  align-items: center;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.85rem;
 }
 
 .user-email {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.75);
-  margin-right: 1rem;
+}
+
+.contact-button,
+.logout-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.contact-button {
+  background-color: transparent;
+  color: #9c7c38;
+  border: 1px solid #9c7c38;
+}
+
+.contact-button:hover {
+  background-color: rgba(156, 124, 56, 0.1);
 }
 
 .logout-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 1.4rem;
-  border: 1px solid #9c7c38;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #9c7c38;
   background-color: transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .logout-button:hover {
-  background-color: #9c7c38;
-  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Media query for responsive navigation */
+@media (max-width: 1024px) {
+  .nav-link {
+    padding: 0 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .nav-links {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px;
+  }
+  
+  .nav-link {
+    padding: 0 0.6rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+  
+  .user-email {
+    display: none;
+  }
 }
