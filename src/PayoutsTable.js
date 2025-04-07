@@ -149,7 +149,12 @@ export const PayoutsTable = ({ reservations, financialData }) => {
                         {formatChannelName(reservation.source)}
                       </span>
                     </td>
-                    <td>{formatCurrency(reservation.baseRate || 0)}</td>
+                    <td>
+                      {formatCurrency(
+                        (parseFloat(reservation.baseRate) || 0) + 
+                        (parseFloat(reservation.claimsProtection) || 0)
+                      )}
+                    </td>
                     <td>{formatCurrency(reservation.cleaningFeeValue || reservation.cleaningFee || 0)}</td>
                     <td>{formatCurrency(reservation.totalTax || 0)}</td>
                     <td className="owner-payout">

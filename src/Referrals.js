@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import api from './api/api';
 import './Referrals.css';
+import { formatCurrency } from './utils/formatters';
 
 export const Partnership = () => {
   // State variables
   const [referrals, setReferrals] = useState([]);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [pendingEarnings, setPendingEarnings] = useState(0);
-  const [activeTab, setActiveTab] = useState('refer'); // 'refer' or 'estimate'
+  const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [referralLink, setReferralLink] = useState("https://yourwebsite.com/refer?id=12345");
   
   // Income estimation states
   const [address, setAddress] = useState('');
@@ -156,7 +157,6 @@ export const Partnership = () => {
 
   // Copy referral link to clipboard
   const copyReferralLink = () => {
-    const referralLink = "https://yourwebsite.com/refer?id=12345";
     navigator.clipboard.writeText(referralLink)
       .then(() => {
         setCopied(true);
@@ -167,7 +167,7 @@ export const Partnership = () => {
   };
 
   // Format currency
-  const formatCurrency = (amount) => {
+  const formatMoney = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -176,503 +176,365 @@ export const Partnership = () => {
     }).format(amount);
   };
 
-  return (
-    <div className="referrals-container">
-      {/* Dashboard Header */}
-      <div className="dashboard-header">
-        <h1 className="page-title">Partnership Program</h1>
-      </div>
-      
-      {/* Small Card Dashboard - Modernized without icons */}
-      <div className="mini-card-dashboard">
-        <div className="mini-card total-card">
-          <div className="mini-card-content">
-            <h3>Total Earnings</h3>
-            <div className="mini-amount">{formatCurrency(totalEarnings)}</div>
-          </div>
-        </div>
-        
-        <div className="mini-card pending-card">
-          <div className="mini-card-content">
-            <h3>Pending</h3>
-            <div className="mini-amount">{formatCurrency(pendingEarnings)}</div>
-          </div>
-        </div>
-        
-        <div className="mini-card referrals-card">
-          <div className="mini-card-content">
-            <h3>Active Partners</h3>
-            <div className="mini-amount">{referrals.filter(r => r.status === 'Active').length}</div>
-          </div>
-        </div>
-        
-        <div className="mini-card projection-card">
-          <div className="mini-card-content">
-            <h3>Annual Projection</h3>
-            <div className="mini-amount">{formatCurrency(totalEarnings * 3)}</div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Enhanced Tab Navigation */}
-      <div className="enhanced-tabs-container">
-        <div className="enhanced-tabs">
-          <button 
-            className={`enhanced-tab ${activeTab === 'refer' ? 'active' : ''}`}
-            onClick={() => setActiveTab('refer')}
-          >
-            <div className="tab-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 2L11 13"></path>
-                <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
-              </svg>
+  // Render tab content based on activeTab
+  const renderTabContent = () => {
+    if (activeTab === 'overview') {
+      return (
+        <>
+          <h2 className="section-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Program Blueprint
+          </h2>
+          <p className="section-description">Engage with our simple 3-step process to activate your passive income source.</p>
+          <div className="process-steps">
+            <div className="process-step">
+              <div className="step-number">1</div>
+              <div className="step-content">
+                <h3 className="step-title">Share Your Holo-Link</h3>
+                <p className="step-description">Distribute your unique partnership link to prospective property owners seeking elite management.</p>
+              </div>
             </div>
-            <div className="tab-text">
-              <span className="tab-title">Become a Partner</span>
-              <span className="tab-subtitle">Earn retirement income</span>
+            <div className="process-step">
+              <div className="step-number">2</div>
+              <div className="step-content">
+                <h3 className="step-title">Owner Integration</h3>
+                <p className="step-description">Upon signup via your link, we seamlessly integrate their property into our high-performance management system.</p>
+              </div>
             </div>
-          </button>
+            <div className="process-step">
+              <div className="step-number">3</div>
+              <div className="step-content">
+                <h3 className="step-title">Continuous Commission Flow</h3>
+                <p className="step-description">Secure 10% of our management fee perpetually, as long as the owner remains partnered.</p>
+              </div>
+            </div>
+          </div>
+        </>
+      );
+    }
+    
+    if (activeTab === 'share') {
+      return (
+        <>
+          <h2 className="section-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            Amplify Your Network
+          </h2>
+          <p className="section-description">Copy and deploy your personalized Holo-Link across your network to maximize earning potential.</p>
+          <div className="share-options">
+            <div className="partnership-link-card glass-card">
+              <input
+                type="text"
+                value={referralLink}
+                className="form-control"
+                readOnly
+              />
+              <button className="calculate-button" onClick={copyReferralLink}>
+                {copied ? "Copied!" : "Copy Holo-Link"}
+              </button>
+            </div>
+          </div>
+        </>
+      );
+    }
+    
+    if (activeTab === 'activity') {
+      return (
+        <>
+          <h2 className="section-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            Activity Stream
+          </h2>
+          {loading ? (
+            <div className="loader-container">
+              <div className="loader"></div>
+              <p className="loading-text">Loading your partnership data...</p>
+            </div>
+          ) : error ? (
+            <div className="error-state glass-card">
+              <div className="error-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              </div>
+              <h3 className="error-title">Connection Error</h3>
+              <p className="error-message">
+                Could not retrieve activity data: {typeof error === 'string' ? error : (error && error.message ? error.message : 'Unknown error')}
+              </p>
+              <button onClick={fetchReferrals} className="calculate-button" style={{ width: 'auto' }}>Retry Connection</button>
+            </div>
+          ) : referrals.length === 0 ? (
+            <div className="empty-state glass-card">
+              <div className="empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+              </div>
+              <h3 className="empty-title">Stream Empty</h3>
+              <p className="empty-message">No referral activity detected. Deploy your Holo-Link to populate the stream.</p>
+            </div>
+          ) : (
+            <div className="activity-table-container">
+              <table className="activity-table">
+                <thead>
+                  <tr>
+                    <th>Partner Asset</th>
+                    <th>Property ID</th>
+                    <th>Integration Date</th>
+                    <th>Status Grid</th>
+                    <th>Projected Fee</th>
+                    <th>Your Yield</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {referrals.map(referral => (
+                    <tr key={referral.id}>
+                      <td>{referral.name}</td>
+                      <td>{referral.propertyAddress}</td>
+                      <td>{new Date(referral.date).toLocaleDateString()}</td>
+                      <td>
+                        <span className={`status-indicator status-${referral.status.toLowerCase()}`}>
+                          {referral.status}
+                        </span>
+                      </td>
+                      <td>{formatMoney(referral.earnings * 10)}</td>
+                      <td>{formatMoney(referral.earnings)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      );
+    }
+    
+    return null;
+  };
+
+  // Render calculator content
+  const renderCalculator = () => {
+    if (estimateLoading) {
+      return (
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p className="loading-text">Calculating Future Values...</p>
+        </div>
+      );
+    }
+    
+    if (estimatedIncome) {
+      return (
+        <div className="results-container">
+          <h4 className="results-title">Forecast Results</h4>
+          
+          <div className="results-card">
+            <span className="result-label">Est. Monthly Revenue</span>
+            <span className="result-value">{formatMoney(estimatedIncome.monthly)}</span>
+          </div>
+          
+          <div className="results-card">
+            <span className="result-label">Est. Management Fee</span>
+            <span className="result-value">{formatMoney(estimatedIncome.managementFee)}</span>
+          </div>
+          
+          <div className="results-card highlight">
+            <span className="result-label">Your Monthly Yield</span>
+            <span className="result-value">{formatMoney(estimatedIncome.monthlyPartnerEarnings)}</span>
+          </div>
+          
+          <div className="results-card highlight">
+            <span className="result-label">Projected Annual Yield</span>
+            <span className="result-value">{formatMoney(estimatedIncome.yearlyPartnerEarnings)}</span>
+          </div>
+          
+          <p className="result-note">Forecasts are speculative, based on current market data and inputs. Actual yields may fluctuate.</p>
           
           <button 
-            className={`enhanced-tab ${activeTab === 'estimate' ? 'active' : ''}`}
-            onClick={() => setActiveTab('estimate')}
+            onClick={() => setEstimatedIncome(null)} 
+            className="calculate-button" 
+            style={{marginTop: 'var(--space-md)', background: 'var(--color-surface-elevated)'}}
           >
-            <div className="tab-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12"></line>
-                <line x1="8" y1="18" x2="21" y2="18"></line>
-                <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                <line x1="3" y1="18" x2="3.01" y2="18"></line>
-              </svg>
-            </div>
-            <div className="tab-text">
-              <span className="tab-title">Income Estimator</span>
-              <span className="tab-subtitle">Calculate partnership earnings</span>
-            </div>
+            Recalculate
           </button>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="form-container">
+        <p className="form-subtitle">Input property parameters to forecast potential income.</p>
+        
+        <form onSubmit={calculateEstimate}>
+          <div className="form-group">
+            <label className="form-label" htmlFor="address">Property Address / Zone</label>
+            <input
+              className="form-control"
+              type="text"
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="e.g., Sector 7G, Neo-London"
+              required
+            />
+          </div>
+          
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label" htmlFor="bedrooms">Bedrooms</label>
+              <select
+                className="form-control"
+                id="bedrooms"
+                value={bedrooms}
+                onChange={(e) => setBedrooms(e.target.value)}
+                required
+              >
+                <option value="">Select Units</option>
+                {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
+                <option value="6+">6+</option>
+              </select>
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label" htmlFor="bathrooms">Bathrooms</label>
+              <select
+                className="form-control"
+                id="bathrooms"
+                value={bathrooms}
+                onChange={(e) => setBathrooms(e.target.value)}
+                required
+              >
+                <option value="">Select Units</option>
+                {[1, 1.5, 2, 2.5, 3, 3.5].map(n => <option key={n} value={n}>{n}</option>)}
+                <option value="4+">4+</option>
+              </select>
+            </div>
+          </div>
+          
+          {estimateError && (
+            <p className="error-message-inline">{estimateError}</p>
+          )}
+          
+          <button
+            type="submit"
+            className="calculate-button"
+            disabled={estimateLoading}
+          >
+            {estimateLoading ? (
+              <><div className="loader"></div> Calculating Forecast...</>
+            ) : (
+              <><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+              </svg> Forecast Income</>
+            )}
+          </button>
+        </form>
+      </div>
+    );
+  };
+
+  return (
+    <div className="referrals-container">
+      {/* Accent Decorations */}
+      <div className="accent-circle accent-circle-1"></div>
+      <div className="accent-circle accent-circle-2"></div>
+      
+      <div className="dashboard-header">
+        <h1 className="page-title">Nexus Partnership Portal</h1>
+        <p className="page-subtitle">Unlock residual income streams. Partner with Luxury Lodging and earn by referring property owners.</p>
+      </div>
+      
+      <div className="stats-grid">
+        <div className="stat-card glass-card">
+          <div className="stat-label">Total Earned</div>
+          <div className="stat-value">{formatMoney(totalEarnings)}</div>
+          <div className="stat-subtext">Lifetime Payouts</div>
+        </div>
+        
+        <div className="stat-card glass-card">
+          <div className="stat-label">Pending Commission</div>
+          <div className="stat-value">{formatMoney(pendingEarnings)}</div>
+          <div className="stat-subtext">Awaiting Confirmation</div>
+        </div>
+        
+        <div className="stat-card glass-card">
+          <div className="stat-label">Active Referrals</div>
+          <div className="stat-value">{referrals.filter(r => r.status === 'Active').length}</div>
+          <div className="stat-subtext">Currently Generating</div>
+        </div>
+        
+        <div className="stat-card glass-card">
+          <div className="stat-label">Est. Annual Income</div>
+          <div className="stat-value">{formatMoney(totalEarnings * 12)}</div>
+          <div className="stat-subtext">Yearly Projection</div>
         </div>
       </div>
       
-      <div className="referrals-content">
-        {activeTab === 'refer' && (
-          <div className="main-content">
-            <div className="how-it-works">
-              <h2 className="section-title">How Our Partnership Program Works</h2>
-              <div className="commission-explainer">
-                <p>You earn <strong>10% of Luxury Lodging's management fee</strong> for as long as both you and your referred property owner stay with us. The more properties you refer, the more passive retirement income you'll generate!</p>
-              </div>
-              <div className="steps-container">
-                <div className="step">
-                  <div className="step-number">1</div>
-                  <h3>Share Your Link</h3>
-                  <p>Share your unique partnership link with property owners interested in our management services.</p>
-                </div>
-                <div className="step">
-                  <div className="step-number">2</div>
-                  <h3>Owner Lists Property</h3>
-                  <p>When they sign up with us, we professionally manage their rental to maximize income.</p>
-                </div>
-                <div className="step">
-                  <div className="step-number">3</div>
-                  <h3>Earn Ongoing Income</h3>
-                  <p>You receive 10% of our management fee for as long as they stay with us - perfect for retirement income.</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="referral-options">
-              <div className="referral-option">
-                <h3>Share Your Partnership Link</h3>
-                <div className="referral-link-container">
-                  <input 
-                    type="text" 
-                    readOnly 
-                    value="https://yourwebsite.com/refer?id=12345"
-                    className="referral-link-input"
-                  />
-                  <button className="copy-link-btn" onClick={copyReferralLink}>
-                    {copied ? (
-                      <>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                        Copy Link
-                      </>
-                    )}
-                  </button>
-                </div>
-                <div className="social-sharing">
-                  <p>Or share directly:</p>
-                  <div className="social-buttons">
-                    <button className="social-btn email">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                        <polyline points="22,6 12,13 2,6"></polyline>
-                      </svg>
-                    </button>
-                    <button className="social-btn facebook">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                      </svg>
-                    </button>
-                    <button className="social-btn twitter">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
-                      </svg>
-                    </button>
-                    <button className="social-btn whatsapp">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="referral-option">
-                <h3>Recommend a Property Owner</h3>
-                {referSubmitted ? (
-                  <div className="success-message">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
-                    <h4>Thank you!</h4>
-                    <p>Your recommendation has been submitted. We'll reach out to them within 1-2 business days.</p>
-                  </div>
-                ) : (
-                  <form className="referral-form" onSubmit={submitReferralContact}>
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label htmlFor="referName">Owner's Name</label>
-                        <input
-                          type="text"
-                          id="referName"
-                          value={referName}
-                          onChange={(e) => setReferName(e.target.value)}
-                          placeholder="Property owner's name"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="form-row">
-                      <div className="form-group half">
-                        <label htmlFor="referEmail">Email</label>
-                        <input
-                          type="email"
-                          id="referEmail"
-                          value={referEmail}
-                          onChange={(e) => setReferEmail(e.target.value)}
-                          placeholder="Their email address"
-                          required
-                        />
-                      </div>
-                      
-                      <div className="form-group half">
-                        <label htmlFor="referPhone">Phone (Optional)</label>
-                        <input
-                          type="tel"
-                          id="referPhone"
-                          value={referPhone}
-                          onChange={(e) => setReferPhone(e.target.value)}
-                          placeholder="Their phone number"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="form-group">
-                      <label htmlFor="referMessage">Property Details (Optional)</label>
-                      <textarea
-                        id="referMessage"
-                        value={referMessage}
-                        onChange={(e) => setReferMessage(e.target.value)}
-                        placeholder="Any information about the property location, size, etc."
-                        rows="3"
-                      ></textarea>
-                    </div>
-                    
-                    <button type="submit" className="submit-btn">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M22 2L11 13"></path>
-                        <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
-                      </svg>
-                      Submit Recommendation
-                    </button>
-                  </form>
-                )}
-              </div>
-            </div>
-            
-            {referrals.length > 0 && (
-              <div className="referrals-activity">
-                <h2 className="section-title">Your Partnership Activity</h2>
-                {loading ? (
-                  <div className="loading">
-                    <div className="spinner"></div>
-                    <p>Loading partnership data...</p>
-                  </div>
-                ) : error ? (
-                  <div className="error-message">
-                    <p>Error: {error.message}</p>
-                    <button onClick={fetchReferrals} className="retry-button">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-                      </svg>
-                      Retry
-                    </button>
-                  </div>
-                ) : (
-                  <div className="referrals-table-container">
-                    <table className="referrals-table">
-                      <thead>
-                        <tr>
-                          <th>Property Owner</th>
-                          <th>Property</th>
-                          <th>Date</th>
-                          <th>Status</th>
-                          <th>Management Fee</th>
-                          <th>Your Commission</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {referrals.map(referral => (
-                          <tr key={referral.id}>
-                            <td>{referral.name}</td>
-                            <td>{referral.propertyAddress}</td>
-                            <td>{new Date(referral.date).toLocaleDateString()}</td>
-                            <td>
-                              <span className={`status-badge ${referral.status.toLowerCase()}`}>
-                                {referral.status}
-                              </span>
-                            </td>
-                            <td>{formatCurrency(referral.earnings * 10)}</td>
-                            <td>{formatCurrency(referral.earnings)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            )}
+      {/* Main Content Area */}
+      <div className="content-wrapper">
+        {/* Left Panel (Tabs & Content) */}
+        <div className="main-panel glass-card">
+          {/* Tab Navigation */}
+          <div className="tab-navigation" data-active-tab={activeTab}>
+            <button 
+              className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
+              onClick={() => setActiveTab('overview')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+              </svg>
+              Program Nexus
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'share' ? 'active' : ''}`}
+              onClick={() => setActiveTab('share')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+              Share & Amplify
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'activity' ? 'active' : ''}`}
+              onClick={() => setActiveTab('activity')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+              </svg>
+              Activity Stream
+            </button>
           </div>
-        )}
+          
+          {/* Tab Content */}
+          <div className="content-section">
+            {renderTabContent()}
+          </div>
+        </div>
         
-        {activeTab === 'estimate' && (
-          <div className="main-content">
-            <div className="income-potential">
-              <h2 className="section-title">Estimate Your Retirement Income</h2>
-              <p className="section-description">
-                See what a property could earn and what your partnership commission would be.
-              </p>
-              
-              <div className="estimate-columns">
-                <div className="estimate-column">
-                  <form className="estimate-form" onSubmit={calculateEstimate}>
-                    <div className="form-group">
-                      <label htmlFor="address">Property Address</label>
-                      <input
-                        type="text"
-                        id="address"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        placeholder="Enter full property address"
-                        required
-                      />
-                    </div>
-                    
-                    <div className="form-row">
-                      <div className="form-group half">
-                        <label htmlFor="bedrooms">Bedrooms</label>
-                        <select
-                          id="bedrooms"
-                          value={bedrooms}
-                          onChange={(e) => setBedrooms(e.target.value)}
-                          required
-                        >
-                          <option value="">Select</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
-                          <option value="5">5</option>
-                          <option value="6+">6+</option>
-                        </select>
-                      </div>
-                      
-                      <div className="form-group half">
-                        <label htmlFor="bathrooms">Bathrooms</label>
-                        <select
-                          id="bathrooms"
-                          value={bathrooms}
-                          onChange={(e) => setBathrooms(e.target.value)}
-                          required
-                        >
-                          <option value="">Select</option>
-                          <option value="1">1</option>
-                          <option value="1.5">1.5</option>
-                          <option value="2">2</option>
-                          <option value="2.5">2.5</option>
-                          <option value="3">3</option>
-                          <option value="3.5">3.5</option>
-                          <option value="4+">4+</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    {estimateError && (
-                      <div className="estimate-error">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <line x1="12" y1="8" x2="12" y2="12"></line>
-                          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
-                        {estimateError}
-                      </div>
-                    )}
-                    
-                    <button 
-                      type="submit" 
-                      className="calculate-btn"
-                      disabled={estimateLoading}
-                    >
-                      {estimateLoading ? (
-                        <>
-                          <div className="spinner" style={{ width: '20px', height: '20px', margin: '0 10px 0 0' }}></div>
-                          Calculating...
-                        </>
-                      ) : (
-                        <>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="8" y1="6" x2="21" y2="6"></line>
-                            <line x1="8" y1="12" x2="21" y2="12"></line>
-                            <line x1="8" y1="18" x2="21" y2="18"></line>
-                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                          </svg>
-                          Calculate Estimate
-                        </>
-                      )}
-                    </button>
-                  </form>
-                </div>
-                
-                <div className="estimate-column">
-                  {estimateLoading ? (
-                    <div className="estimate-loading">
-                      <div className="spinner"></div>
-                      <p>Calculating your estimate...</p>
-                    </div>
-                  ) : estimatedIncome ? (
-                    <div className="estimate-results">
-                      <h3>Estimated Income</h3>
-                      
-                      <div className="estimate-cards">
-                        <div className="estimate-card">
-                          <div className="estimate-label">Property Monthly Rental</div>
-                          <div className="estimate-value">{formatCurrency(estimatedIncome.monthly)}</div>
-                        </div>
-                        
-                        <div className="estimate-card">
-                          <div className="estimate-label">Our Management Fee</div>
-                          <div className="estimate-value">{formatCurrency(estimatedIncome.managementFee)}/mo</div>
-                        </div>
-                        
-                        <div className="estimate-card highlight-card">
-                          <div className="estimate-label">Your Annual Partnership Income</div>
-                          <div className="estimate-value">{formatCurrency(estimatedIncome.yearlyPartnerEarnings)}</div>
-                        </div>
-                      </div>
-                      
-                      <div className="referral-opportunity">
-                        <h4>Earn {formatCurrency(estimatedIncome.monthlyPartnerEarnings)} monthly!</h4>
-                        <p>As our partner, you'll earn 10% of our management fee for as long as the property stays with us - perfect for building retirement income.</p>
-                        <button className="refer-property-btn" onClick={() => setActiveTab('refer')}>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M22 2L11 13"></path>
-                            <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
-                          </svg>
-                          Recommend This Property
-                        </button>
-                      </div>
-                      
-                      <div className="estimate-note">
-                        <p>
-                          Estimates based on similar properties in the area. Actual results may vary based on location, amenities, and market conditions.
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="estimate-placeholder">
-                      <div className="estimate-placeholder-text">
-                        <h3>Build Your Retirement Income</h3>
-                        <p>Enter property details to see how much passive income you could earn through our partnership program.</p>
-                        <ul className="benefit-list">
-                          <li>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            Earn 10% of Luxury Lodging's management fee
-                          </li>
-                          <li>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            Income continues as long as they stay with us
-                          </li>
-                          <li>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            Perfect for building retirement income
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="faq-section compact">
-              <h2 className="section-title">Common Questions</h2>
-              <div className="faq-grid">
-                <div className="faq-item">
-                  <h3>How is the 10% commission calculated?</h3>
-                  <p>Your commission is 10% of Luxury Lodging's management fee for each property. For example, if our management fee is $1,000 monthly, you earn $100 each month from that property.</p>
-                </div>
-                <div className="faq-item">
-                  <h3>How long do I receive commissions?</h3>
-                  <p>You'll receive the 10% commission for as long as both you and the property owner remain with our service. This creates a reliable, passive income stream ideal for retirement planning.</p>
-                </div>
-              </div>
-            </div>
+        {/* Right Sidebar (Calculator) */}
+        <div className="side-panel">
+          <div className="side-panel-section glass-card">
+            <h3 className="side-panel-title">
+              <svg className="side-panel-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20V10M18 20V4M6 20V16"/>
+              </svg>
+              Income Forecaster
+            </h3>
+            {renderCalculator()}
           </div>
-        )}
+        </div>
       </div>
       
       {/* Call to Action */}
-      <div className="cta-section">
-        <div className="cta-content">
-          <h2>Build Your Retirement Income Today</h2>
-          <p>Share your partnership link, earn 10% of our management fees, and build ongoing passive income with each property you refer.</p>
-          <button className="cta-button" onClick={() => setActiveTab('refer')}>
-            Become a Partner
-          </button>
-        </div>
+      <div className="cta-container glass-card">
+        <h2 className="cta-title">Activate Your Partnership Vector</h2>
+        <p className="cta-text">Generate your unique Holo-Link now and begin transmitting it to potential property partners.</p>
+        <button className="cta-button" onClick={() => setActiveTab('share')}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+          Generate Holo-Link
+        </button>
       </div>
     </div>
   );

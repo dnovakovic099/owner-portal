@@ -111,7 +111,7 @@ export const ReservationsDashboard = ({ reservations, loading, selectedProperty 
   
   // Calculate total base rate with all the required components
   const totalBaseRate = reservations.reduce((sum, res) => {
-    // Get all the required components
+    // Base rate already has claims protection subtracted in the Reservations component
     const baseRate = parseFloat(res.baseRate) || 0;
     const weeklyDiscount = parseFloat(res.weeklyDiscount) || parseFloat(res['weekly Discount']) || 0;
     const couponDiscount = parseFloat(res.couponDiscount) || parseFloat(res['coupon Discount']) || 0;

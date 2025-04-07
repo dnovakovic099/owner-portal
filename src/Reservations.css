@@ -334,17 +334,20 @@
   color: #ef4444 !important; /* Force red color for fees > 0 */
 }
 
-/* Center all table headers */
-.data-table th {
-  text-align: center !important;
-  padding: 0.75rem 0.5rem !important;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #1f2937;
-  border-bottom: 2px solid #e5e7eb;
+/* Animation for loading financial data */
+.loading-financial-data {
+  position: relative;
+  animation: pulse 2s infinite;
 }
 
-/* If you still want the Booking Information header to be left-aligned, add this rule after the one above */
-.data-table th:first-child { /* Booking Information */
-  text-align: center !important;
+@keyframes pulse {
+  0% {
+    background-color: #ffffff;
+  }
+  50% {
+    background-color: #f9fafb;
+  }
+  100% {
+    background-color: #ffffff;
+  }
 }

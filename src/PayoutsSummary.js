@@ -23,12 +23,19 @@ export const PayoutsSummary = ({ reservations, financialData }) => {
     const cleaningFeeIndex = columns.findIndex(col => col.name === 'cleaningFeeValue');
     const taxIndex = columns.findIndex(col => col.name === 'totalTax');
     const channelFeeIndex = columns.findIndex(col => col.name === 'hostChannelFee');
+    const claimsProtectionIndex = columns.findIndex(col => col.name === 'claimsProtection');
     
     // Sum up values
     const summary = financialData.rows.reduce((acc, row) => {
+      // Get baseRate and subtract claimsProtection if available
+      let baseRateValue = parseFloat(row[baseRateIndex] || 0);
+      if (claimsProtectionIndex !== -1) {
+        baseRateValue += parseFloat(row[claimsProtectionIndex] || 0); // Add since it's a negative value
+      }
+      
       return {
         totalPayout: acc.totalPayout + parseFloat(row[ownerPayoutIndex] || 0),
-        totalBaseRate: acc.totalBaseRate + parseFloat(row[baseRateIndex] || 0),
+        totalBaseRate: acc.totalBaseRate + baseRateValue,
         totalCleaningFees: acc.totalCleaningFees + parseFloat(row[cleaningFeeIndex] || 0),
         totalTaxes: acc.totalTaxes + parseFloat(row[taxIndex] || 0),
         totalChannelFees: acc.totalChannelFees + parseFloat(row[channelFeeIndex] || 0)

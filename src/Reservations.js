@@ -469,16 +469,22 @@ export const Reservations = () => {
         reservations={filteredReservations.map(res => {
           // Merge in financial data if available
           const finData = financialData[res.id] || {};
+          // Subtract claims protection from base rate
+          const baseRateValue = parseFloat(finData.baseRate || res.baseRate || 0);
+          const claimsProtectionValue = parseFloat(finData.claimsProtection || 0);
+          const adjustedBaseRate = baseRateValue + claimsProtectionValue;
+          
           return { 
             ...res, 
             ownerPayout: finData.ownerPayout || res.ownerPayout || 0,
-            baseRate: finData.baseRate || res.baseRate || 0,
+            baseRate: adjustedBaseRate,
             cleaningFeeValue: finData.TotalCleaningFee || res.cleaningFee || 0,
             weeklyDiscount: finData.weeklyDiscount || finData['weekly Discount'] || 0,
             couponDiscount: finData.couponDiscount || finData['coupon Discount'] || 0,
             monthlyDiscount: finData.monthlyDiscount || finData['monthly Discount'] || 0,
             cancellationPayout: finData.cancellationPayout || finData['cancellation Payout'] || 0,
-            otherFees: finData.otherFees || finData['other Fees'] || 0
+            otherFees: finData.otherFees || finData['other Fees'] || 0,
+            claimsProtection: claimsProtectionValue
           };
         })}
         loading={loading || loadingFinancials}
@@ -542,7 +548,8 @@ export const Reservations = () => {
                     parseFloat(finData.couponDiscount || finData['coupon Discount'] || 0) +
                     parseFloat(finData.monthlyDiscount || finData['monthly Discount'] || 0) +
                     parseFloat(finData.cancellationPayout || finData['cancellation Payout'] || 0) +
-                    parseFloat(finData.otherFees || finData['other Fees'] || 0)
+                    parseFloat(finData.otherFees || finData['other Fees'] || 0) +
+                    parseFloat(finData.claimsProtection || 0) // Add claims protection since it's a negative value
                   ) || (parseFloat(reservation.totalPrice) - parseFloat(reservation.cleaningFee || 0)) / nights;
                   
                   // Get cleaning fee from financial report or reservation
@@ -557,9 +564,7 @@ export const Reservations = () => {
                                   reservation.source || 
                                   reservation.channelName || 'Direct';
                   
-
-console.log({finData});
-                                  // Get payment processing fee from financial report instead of calculating it
+                  // Get payment processing fee from financial report instead of calculating it
                   const paymentProcessingFee = parseFloat(finData['PaymentProcessing']) || 0;
                   
                   // Pet fee might be in different fields, try to locate it
@@ -655,7 +660,7 @@ console.log({finData});
           </table>
         )}
       </div>
-      
+
       {/* Results info */}
       <div className="results-info">
         {!loading && !error && (

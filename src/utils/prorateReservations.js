@@ -186,10 +186,14 @@ export const prorateReservations = (reservations, financialData, periodStart, pe
       channelName: combinedData.channelName || combinedData.source,
       // Update nights to be only the nights in this period
       nights: daysInPeriod,
-      // Prorate financial values
-      baseRate: prorateValue(combinedData.baseRate || 
-                           ((combinedData.totalPrice - (combinedData.cleaningFee || 0)) / totalDays * daysInPeriod), 
-                           totalDays, daysInPeriod),
+      // Prorate financial values and adjust baseRate for claimsProtection
+      baseRate: prorateValue(
+        (parseFloat(combinedData.baseRate) || 0) + 
+        (parseFloat(combinedData.claimsProtection) || 0) || 
+        ((combinedData.totalPrice - (combinedData.cleaningFee || 0)) / totalDays * daysInPeriod), 
+        totalDays, daysInPeriod
+      ),
+      claimsProtection: prorateValue(combinedData.claimsProtection || 0, totalDays, daysInPeriod),
       cleaningFeeValue: prorateValue(combinedData.cleaningFeeValue || combinedData.cleaningFee || 0, 
                                   totalDays, daysInPeriod),
       totalTax: prorateValue(combinedData.totalTax || 0, 
