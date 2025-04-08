@@ -5,6 +5,7 @@ import { Reservations } from './Reservations';
 import { Calendar } from './Calendar';
 import { Payouts } from './Payouts';
 import { Partnership } from './Referrals';
+import IncomeEstimate from './IncomeEstimate';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import api from './api/api';
@@ -92,6 +93,7 @@ const AppContent = () => {
         {currentPage === 'calendar' && <Calendar />}
         {currentPage === 'payouts' && <Payouts />}
         {currentPage === 'referrals' && <Partnership />}
+        {currentPage === 'income-estimate' && <IncomeEstimate />}
       </main>
     </div>
   );

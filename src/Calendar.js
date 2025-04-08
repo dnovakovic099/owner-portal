@@ -405,48 +405,45 @@ export const Calendar = () => {
       </div>
 
       {/* Property selector */}
-      <div className="property-selector">
+      <div className="calendar-header-bar">
         <div className="property-select-wrapper">
+          <label htmlFor="propertySelect">Select Property</label>
           <select
+            id="propertySelect"
             value={selectedProperty}
             onChange={handlePropertyChange}
             className="property-select"
           >
-            <option value="" disabled>Select a property</option>
-            {properties.map(property => (
+            {properties.map((property) => (
               <option key={property.id} value={property.id}>
-                {property.internalListingName || property.name || `Property #${property.id}`}
+                {property.nickname || property.address}
               </option>
             ))}
           </select>
-          <span className="select-arrow">▼</span>
         </div>
-        
-        {/* Total Owner Payout Summary - moved to be on same line as dropdown */}
-        {!loading && selectedProperty && processedReservations.length > 0 && (
-          <div className="inline-payout-summary">
-            <span className="payout-amount">
-              {formatCurrency(
-                processedReservations
-                  .filter(res => {
-                    // Include reservations that overlap with the current month
-                    const resMonth = res.checkInDate.getMonth();
-                    const resYear = res.checkInDate.getFullYear();
-                    const resOutMonth = res.checkOutDate.getMonth();
-                    const resOutYear = res.checkOutDate.getFullYear();
-                    
-                    const currentMonthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-                    const currentMonthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-                    
-                    // Reservation overlaps with current month if:
-                    // Check-in is before or during this month AND Check-out is during or after this month
-                    return (res.checkInDate <= currentMonthEnd && res.checkOutDate >= currentMonthStart);
-                  })
-                  .reduce((sum, res) => sum + (res.ownerPayout || 0), 0)
-              )}
-            </span>
-          </div>
-        )}
+
+        <div className="inline-payout-summary">
+          <span className="payout-amount">
+            {formatCurrency(
+              processedReservations
+                .filter(res => {
+                  // Include reservations that overlap with the current month
+                  const resMonth = res.checkInDate.getMonth();
+                  const resYear = res.checkInDate.getFullYear();
+                  const resOutMonth = res.checkOutDate.getMonth();
+                  const resOutYear = res.checkOutDate.getFullYear();
+                  
+                  const currentMonthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+                  const currentMonthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+                  
+                  // Reservation overlaps with current month if:
+                  // Check-in is before or during this month AND Check-out is during or after this month
+                  return (res.checkInDate <= currentMonthEnd && res.checkOutDate >= currentMonthStart);
+                })
+                .reduce((sum, res) => sum + (res.ownerPayout || 0), 0)
+            )}
+          </span>
+        </div>
       </div>
 
       {loading && (

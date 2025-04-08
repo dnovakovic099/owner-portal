@@ -1,0 +1,447 @@
+/* Income Estimate Gold Theme CSS */
+:root {
+  --gold-primary: #D4AF37;
+  --gold-light: #F8F4E3;
+  --gold-dark: #AA8C2C;
+  --gold-accent: #EACB64;
+  --gold-muted: #B4945C;
+  --text-dark: #333333;
+  --text-medium: #555555;
+  --text-light: #777777;
+  --white: #FFFFFF;
+  --off-white: #F9F9F9;
+  --light-gray: #F0F0F0;
+  --border-light: #E0E0E0;
+  --success-green: #34D399;
+}
+
+/* Main container styles */
+.income-estimate-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-dark);
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Form sections */
+.form-section {
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background-color: var(--off-white);
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-section h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--gold-primary);
+  padding-bottom: 0.75rem;
+  display: inline-block;
+}
+
+/* Form input styling */
+.form-control {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text-dark);
+  background-color: var(--white);
+  background-clip: padding-box;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+  outline: 0;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-medium);
+}
+
+/* Button styling */
+.btn-primary {
+  background-color: var(--gold-primary);
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(212, 175, 55, 0.3);
+  text-align: center;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  background-color: var(--gold-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(212, 175, 55, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(212, 175, 55, 0.3);
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
+/* Results container styling */
+.results-container {
+  margin-top: 2rem;
+}
+
+.result-card {
+  background-color: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.results-header {
+  padding: 1.5rem 2rem;
+  background-color: var(--gold-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--gold-accent);
+}
+
+.results-header h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--gold-dark);
+}
+
+.new-estimate-btn {
+  background-color: var(--white);
+  color: var(--gold-dark);
+  border: 2px solid var(--gold-primary);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.new-estimate-btn:hover {
+  background-color: var(--gold-primary);
+  color: var(--white);
+}
+
+/* Property details section */
+.property-details {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.address-block h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.address-block p {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+/* Revenue showcase */
+.revenue-showcase {
+  padding: 2rem;
+  display: flex;
+  gap: 2rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.annual-revenue {
+  flex: 2;
+  padding: 1.5rem;
+  background-color: var(--gold-light);
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid var(--gold-accent);
+}
+
+.revenue-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  background-color: var(--gold-primary);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.revenue-amount {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--gold-dark);
+  margin-bottom: 0.5rem;
+}
+
+.revenue-caption {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.monthly-revenue {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.monthly-card {
+  width: 100%;
+  background-color: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.monthly-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.monthly-amount {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* Performance metrics */
+.performance-metrics {
+  padding: 2rem;
+  display: flex;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.metric-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 1.25rem;
+  background-color: var(--light-gray);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+}
+
+.metric-icon {
+  margin-right: 1rem;
+  width: 40px;
+  height: 40px;
+  background-color: var(--gold-accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+}
+
+.metric-content {
+  flex: 1;
+}
+
+.metric-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-light);
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.05em;
+}
+
+.metric-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* Confidence section */
+.confidence-wrapper {
+  padding: 2rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.confidence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.confidence-header h4 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.confidence-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.confidence-badge.high {
+  background-color: #DCFCE7;
+  color: #166534;
+}
+
+.confidence-badge.medium {
+  background-color: #FEF9C3;
+  color: #854D0E;
+}
+
+.confidence-badge.low {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+}
+
+.confidence-description {
+  margin-bottom: 1.25rem;
+  color: var(--text-medium);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.confidence-bar {
+  height: 10px;
+  background-color: var(--light-gray);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.confidence-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.5s ease;
+}
+
+.confidence-fill.high {
+  background-color: #34D399;
+}
+
+.confidence-fill.medium {
+  background-color: #FBBF24;
+}
+
+.confidence-fill.low {
+  background-color: #F87171;
+}
+
+/* Estimate notes */
+.estimate-notes {
+  padding: 2rem;
+}
+
+.estimate-notes h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.estimate-notes p {
+  margin: 0;
+  color: var(--text-medium);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .revenue-showcase {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .annual-revenue, .monthly-revenue {
+    width: 100%;
+  }
+  
+  .performance-metrics {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .income-estimate-container {
+    padding: 1rem;
+  }
+  
+  .results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .new-estimate-btn {
+    align-self: flex-start;
+  }
+  
+  .revenue-amount {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-section {
+    padding: 1.5rem;
+  }
+  
+  .revenue-amount {
+    font-size: 1.75rem;
+  }
+  
+  .metric-card {
+    padding: 1rem;
+  }
+  
+  .metric-icon {
+    width: 32px;
+    height: 32px;
+  }
+}

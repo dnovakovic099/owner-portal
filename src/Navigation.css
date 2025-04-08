@@ -19,13 +19,11 @@
 .nav-left {
   display: flex;
   align-items: center;
+  flex: 1;
 }
 
 .nav-brand {
-  display: flex;
-  align-items: center;
-  width: 50px;
-  margin-right: 10px;
+  display: none; /* Hide the brand section completely */
 }
 
 .brand-logo {
@@ -64,8 +62,9 @@
 
 .nav-links {
   display: flex;
-  margin-left: 10px;
+  margin-left: 0; /* Remove the left margin */
   height: 100%;
+  flex: 1; /* Allow links to use available space */
 }
 
 .nav-link {
@@ -142,6 +141,26 @@
   border-color: rgba(255, 255, 255, 0.3);
 }
 
+/* Hamburger menu for mobile */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  cursor: pointer;
+  z-index: 120;
+}
+
+.menu-toggle span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  border-radius: 10px;
+  background: #9c7c38;
+  transition: all 0.3s ease;
+}
+
 /* Media query for responsive navigation */
 @media (max-width: 1024px) {
   .nav-link {
@@ -151,6 +170,10 @@
 }
 
 @media (max-width: 900px) {
+  .nav-container {
+    position: relative;
+  }
+  
   .nav-links {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -165,5 +188,85 @@
   
   .user-email {
     display: none;
+  }
+  
+  .contact-button,
+  .logout-button {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .menu-toggle {
+    display: flex;
+  }
+  
+  .nav-container {
+    padding: 0 1rem;
+    height: 60px;
+  }
+  
+  .nav-links {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background-color: #1a1a1a;
+    height: 0;
+    flex-direction: column;
+    overflow: hidden;
+    transition: height 0.3s ease;
+    z-index: 110;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .nav-links.open {
+    height: auto;
+    padding-bottom: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 60px);
+  }
+  
+  .nav-link {
+    height: auto;
+    padding: 15px 20px;
+    width: 100%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 3px solid transparent;
+  }
+  
+  .nav-link.active {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 3px solid #9c7c38;
+  }
+  
+  .nav-right {
+    gap: 8px;
+  }
+  
+  .app-logo {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .contact-button,
+  .logout-button {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 0 0.75rem;
+  }
+  
+  .contact-button,
+  .logout-button {
+    padding: 4px 8px;
+    font-size: 0.65rem;
   }
 }

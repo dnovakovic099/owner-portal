@@ -127,14 +127,43 @@
   .dashboard-card-value {
     font-size: 22px;
   }
+  
+  .dashboard-card.future {
+    grid-column: auto;
+  }
 }
 
 @media (max-width: 480px) {
+  .dashboard-container {
+    padding: 12px;
+  }
+  
   .dashboard-cards {
     grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  .dashboard-card {
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .dashboard-card-label {
+    font-size: 12px;
+    margin-bottom: 6px;
   }
   
   .dashboard-card-value {
-    font-size: 20px;
+    font-size: 18px;
+  }
+  
+  .loading-indicator-small {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* Make the fifth card (future payouts) take full width on mobile */
+  .dashboard-card:nth-child(5) {
+    grid-column: span 2;
   }
 }

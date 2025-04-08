@@ -797,85 +797,73 @@
 /* Owner Payout Card Styling */
 .payout-container {
   display: flex;
+  flex-direction: column;
   height: auto;
-  margin-top: 0.75rem;
-  background: linear-gradient(145deg, #ffffff, #f9f9f9);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03), 0 1px 5px rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  margin-top: 10px;
+  background: linear-gradient(to right, #f7fbfa, #f1f8f5);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 18px;
+  transition: all 0.2s ease;
 }
 
 .payout-section {
-  flex: 1;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  position: relative;
-  transition: all 0.3s ease;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
 }
 
 .payout-section:hover {
-  background-color: rgba(255, 255, 255, 0.7);
-  transform: translateY(-2px);
+  background-color: rgba(22, 163, 74, 0.03);
+  transform: translateX(2px);
 }
 
-.payout-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background-color: rgba(22, 163, 74, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-  color: #16a34a;
-  transition: all 0.3s ease;
-}
-
-.payout-icon.recent {
-  color: var(--primary-color);
-  background-color: rgba(156, 124, 56, 0.1);
+.payout-section:last-child {
+  border-bottom: none;
 }
 
 .payout-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .payout-value {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.2rem;
-  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
   color: #16a34a;
-  line-height: 1;
-  margin-bottom: 0.5rem;
-  transition: all 0.3s ease;
+  letter-spacing: -0.01em;
 }
 
-.payout-value.last-month-value {
-  color: var(--primary-color);
+.payout-value.red {
+  color: #ef4444;
 }
 
-.payout-percentage {
-  font-size: 0.85rem;
-  color: #64748b;
-  margin-top: 0.75rem;
-  background: rgba(22, 163, 74, 0.08);
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-weight: 500;
+.property-performance-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
 }
 
-.payout-divider {
-  width: 1px;
-  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.06), transparent);
+.property-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  transition: transform 0.15s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.property-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* Partnership Card Styling */

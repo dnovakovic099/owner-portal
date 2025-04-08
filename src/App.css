@@ -144,6 +144,40 @@
 /* Media queries for responsiveness */
 @media (max-width: 768px) {
   .main-content {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1rem;
+  }
+  
+  .api-loading, .api-error {
+    padding: 1.5rem;
+  }
+  
+  .spinner {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .retry-button {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 1rem 0.75rem;
+  }
+  
+  .api-loading h2, .api-error h2 {
+    font-size: 1.5rem;
+  }
+  
+  .api-loading p, .api-error p {
+    font-size: 0.9rem;
+  }
+  
+  /* Improve mobile scrolling experience */
+  html, body {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 }

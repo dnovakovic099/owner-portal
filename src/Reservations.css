@@ -410,3 +410,101 @@
   opacity: 0.8;
   font-size: 0.75rem;
 }
+
+/* Mobile responsive adjustments */
+@media (max-width: 1024px) {
+  .booking-info-cell {
+    width: 25%;
+  }
+  
+  .rate-cell, 
+  .fee-cell, 
+  .tax-cell,
+  .pet-fee-cell,
+  .combined-fees-cell,
+  .owner-payout-cell {
+    width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .wider-page {
+    padding: 0 10px;
+  }
+  
+  .page-header {
+    margin-bottom: 1rem;
+  }
+  
+  .booking-info-cell {
+    width: 30%;
+  }
+  
+  .data-table th {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.25rem !important;
+  }
+  
+  .data-table td {
+    padding: 0.4rem 0.25rem;
+  }
+  
+  .guest-name-reso {
+    font-size: 0.85rem;
+  }
+  
+  .property-name {
+    font-size: 0.75rem;
+  }
+  
+  .dates, .nights {
+    font-size: 0.7rem;
+  }
+  
+  .payout-value {
+    font-size: 0.9rem;
+  }
+  
+  .owner-payout-cell span {
+    font-size: 0.9rem;
+  }
+  
+  .fee-label, .fee-value {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .wider-page {
+    padding: 0 8px;
+  }
+  
+  .table-container.wider-table {
+    margin: 0 -8px;
+    width: calc(100% + 16px);
+  }
+  
+  .data-table th:nth-child(4),  /* Tourism Tax */
+  .data-table th:nth-child(5),  /* Pet Fee */
+  .data-table td:nth-child(4),  /* Tourism Tax Cell */
+  .data-table td:nth-child(5) { /* Pet Fee Cell */
+    display: none;
+  }
+  
+  .data-table th {
+    font-size: 0.7rem;
+    padding: 0.5rem 0.15rem !important;
+  }
+  
+  .booking-info-cell {
+    width: 40%;
+  }
+  
+  .guest-name-reso {
+    font-size: 0.8rem;
+  }
+  
+  .dates, .nights {
+    font-size: 0.65rem;
+  }
+}

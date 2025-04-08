@@ -123,6 +123,7 @@
     
     .filter-row {
       flex-direction: column;
+      gap: 12px;
     }
     
     .filter-item {
@@ -131,10 +132,39 @@
     
     .filter-actions {
       width: 100%;
+      margin-top: 8px;
     }
     
     .export-button {
       width: 100%;
       justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .reservations-filters {
+      padding: 12px;
+    }
+    
+    .filter-label {
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    
+    .filter-input {
+      height: 38px;
+      font-size: 13px;
+      padding: 0 10px;
+    }
+    
+    select.filter-input {
+      background-position: right 8px center;
+      padding-right: 30px;
+    }
+    
+    .export-button {
+      height: 38px;
+      font-size: 13px;
+      padding: 0 16px;
     }
   }
