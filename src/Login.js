@@ -26,9 +26,9 @@ export const Login = ({ onLoginSuccess }) => {
       
       console.log('Login response:', response); // Debug log
       
-      if (response && response.token) {
+      if (response && response.accessToken) {
         // Store token in localStorage for persistent auth
-        localStorage.setItem('authToken', response.token);
+        localStorage.setItem('authToken', response.accessToken);
         
         // Store user data if available
         if (response.user) {

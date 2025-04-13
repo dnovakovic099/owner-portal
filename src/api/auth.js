@@ -54,7 +54,7 @@ export const login = async (email, password) => {
   console.log('API login attempt for:', email);
   
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`https://luxurylodgingpm.co/luxury_lodging_mobile_api/auth/signin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -73,11 +73,8 @@ export const login = async (email, password) => {
     console.log('Login API response:', data);
     
     // Store token and user data immediately
-    if (data.token) {
-      localStorage.setItem('authToken', data.token);
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-      }
+    if (data.accessToken) {
+      localStorage.setItem('authToken', data.accessToken);
     }
     
     return data;
