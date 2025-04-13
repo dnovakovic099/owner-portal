@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Referrals.css';
 import { formatCurrency } from './utils/formatters';
+import api from './api/api';
 
 export const Partnership = () => {
   // State variables
@@ -12,6 +13,8 @@ export const Partnership = () => {
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [referralLink, setReferralLink] = useState("https://yourwebsite.com/refer?id=12345");
+  const [activeReferral, setActiveReferral] = useState(0);
+  const [yearlyProjection, setYearlyProjection] = useState(0);
   
   // Income estimation states
   const [address, setAddress] = useState('');
@@ -69,6 +72,7 @@ export const Partnership = () => {
   // Fetch referrals on component mount
   useEffect(() => {
     fetchReferrals();
+    fetchPartnershipInfo();
   }, []);
 
   // Reset copied state after 3 seconds
@@ -80,6 +84,32 @@ export const Partnership = () => {
       return () => clearTimeout(timer);
     }
   }, [copied]);
+
+  const fetchPartnershipInfo = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await api.getPartnershipInfo();
+      let totalEarned = 0;
+      let pendingCommission = 0;
+      let activeReferral = 0;
+      let yearlyProjection = 0;
+      if (data.length > 0) {
+        totalEarned = data.reduce((sum, item) => sum + item?.totalEarned, 0);
+        pendingCommission = data.reduce((sum, item) => sum + item?.pendingCommission, 0);
+        activeReferral = data.reduce((sum, item) => sum + item?.activeReferral, 0);
+        yearlyProjection = data.reduce((sum, item) => sum + item?.yearlyProjection, 0);
+      }
+
+      setTotalEarnings(totalEarned);
+      setPendingEarnings(pendingCommission);
+      setActiveReferral(activeReferral);
+      setYearlyProjection(yearlyProjection);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   // Fetch referrals function
   const fetchReferrals = async () => {
@@ -102,12 +132,12 @@ export const Partnership = () => {
       
       // Calculate totals
       const total = mockReferrals.reduce((sum, ref) => sum + ref.earnings, 0);
-      setTotalEarnings(total);
+      // setTotalEarnings(total);
       
       const pending = mockReferrals
         .filter(ref => ref.status === 'Pending')
         .reduce((sum, ref) => sum + ref.earnings, 0);
-      setPendingEarnings(pending);
+      // setPendingEarnings(pending);
       
     } catch (err) {
       console.error("Error fetching referrals:", err);
@@ -739,7 +769,7 @@ export const Partnership = () => {
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="18 15 12 9 6 15"></polyline>
               </svg>
-              8%
+              0%
             </span>
           </div>
           <div className="stat-subtext">Lifetime Payouts</div>
@@ -759,7 +789,7 @@ export const Partnership = () => {
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="18 15 12 9 6 15"></polyline>
               </svg>
-              12%
+              0%
             </span>
           </div>
           <div className="stat-subtext">Awaiting Confirmation</div>
@@ -774,12 +804,12 @@ export const Partnership = () => {
           </div>
           <div className="stat-label">Active Referrals</div>
           <div className="stat-value">
-            {referrals.filter(r => r.status === 'Active').length}
+            {activeReferral}
             <span className="stat-trend stat-trend-up">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="18 15 12 9 6 15"></polyline>
               </svg>
-              25%
+              0%
             </span>
           </div>
           <div className="stat-subtext">Currently Generating</div>
@@ -793,12 +823,12 @@ export const Partnership = () => {
           </div>
           <div className="stat-label">Est. Annual Income</div>
           <div className="stat-value">
-            {formatMoney(totalEarnings * 12)}
+            {formatMoney(yearlyProjection)}
             <span className="stat-trend stat-trend-up">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="18 15 12 9 6 15"></polyline>
               </svg>
-              15%
+              0%
             </span>
           </div>
           <div className="stat-subtext">Yearly Projection</div>

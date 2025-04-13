@@ -424,6 +424,36 @@ const api = {
       console.log("Returning mock data due to API error");
       return getMockIncomeEstimate(params);
     }
+  },
+
+  getPartnershipInfo: async (params = {}) => {
+    try {
+      const response = await fetch(`https://luxurylodgingpm.co/luxury_lodging_mobile_api/owner-portal/getpartnershipinfo`, {
+        method: 'GET',
+        headers: auth.getAuthHeaders()
+      });
+
+      console.log({ response });
+
+      // Handle 401 Unauthorized
+      if (response.status === 401) {
+        auth.logout();
+        throw new Error('Your session has expired. Please login again.');
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      console.log({ data });
+      return data.data;
+    } catch (error) {
+      console.error('Failed to fetch partnershipinfo:', error);
+      return null
+    }
   }
 };
 
