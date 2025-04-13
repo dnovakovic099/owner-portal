@@ -12,9 +12,10 @@ export const Partnership = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [referralLink, setReferralLink] = useState("https://yourwebsite.com/refer?id=12345");
+  const [referralLink, setReferralLink] = useState("https://yourwebsite.com/refer");
   const [activeReferral, setActiveReferral] = useState(0);
   const [yearlyProjection, setYearlyProjection] = useState(0);
+  const [referralCode, setReferralCode] = useState("");
   
   // Income estimation states
   const [address, setAddress] = useState('');
@@ -73,6 +74,7 @@ export const Partnership = () => {
   useEffect(() => {
     fetchReferrals();
     fetchPartnershipInfo();
+    fetchReferralCode();
   }, []);
 
   // Reset copied state after 3 seconds
@@ -84,6 +86,27 @@ export const Partnership = () => {
       return () => clearTimeout(timer);
     }
   }, [copied]);
+
+  const fetchReferralCode = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await api.getReferralCode();
+      if (data) {
+        console.log(data);
+        setReferralCode(data);
+        const updatedLink = `${referralLink}?id=${data}`;
+        setReferralLink(updatedLink);
+      }
+      setLoading(false);
+      setError(null);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      setError("Error fetching partnership info");
+    }
+  }
 
   const fetchPartnershipInfo = async () => {
     setLoading(true);
@@ -106,8 +129,12 @@ export const Partnership = () => {
       setPendingEarnings(pendingCommission);
       setActiveReferral(activeReferral);
       setYearlyProjection(yearlyProjection);
+      setLoading(false);
+      setError(null);
     } catch (error) {
       console.log(error);
+      setLoading(false);
+      setError("Error fetching partnership info");
     }
   }
 
