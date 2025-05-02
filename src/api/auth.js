@@ -54,7 +54,7 @@ export const login = async (email, password) => {
   console.log('API login attempt for:', email);
   
   try {
-    const response = await fetch(`https://luxurylodgingpm.co/luxury_lodging_mobile_api/auth/signin`, {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

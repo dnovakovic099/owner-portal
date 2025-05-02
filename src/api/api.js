@@ -428,7 +428,7 @@ const api = {
 
   getPartnershipInfo: async (params = {}) => {
     try {
-      const response = await fetch(`https://luxurylodgingpm.co/luxury_lodging_mobile_api/owner-portal/getpartnershipinfo`, {
+      const response = await fetch(`${API_BASE_URL}/getpartnershipinfo`, {
         method: 'GET',
         headers: auth.getAuthHeaders()
       });
@@ -458,7 +458,7 @@ const api = {
 
   getReferralCode: async (params = {}) => {
     try {
-      const response = await fetch(`https://luxurylodgingpm.co/luxury_lodging_mobile_api/owner-portal/getreferralcode`, {
+      const response = await fetch(`${API_BASE_URL}/getreferralcode`, {
         method: 'GET',
         headers: auth.getAuthHeaders()
       });
