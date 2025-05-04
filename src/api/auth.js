@@ -73,8 +73,8 @@ export const login = async (email, password) => {
     console.log('Login API response:', data);
     
     // Store token and user data immediately
-    if (data.accessToken) {
-      localStorage.setItem('authToken', data.accessToken);
+    if (data.token) {
+      localStorage.setItem('authToken', data.token);
     }
     
     return data;
